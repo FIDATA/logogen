@@ -23,7 +23,7 @@ plugins {
 }
 
 description = 'Generation of logo in all known formats'
-tags.set(['logo', 'imconv', 'convert', 'image']) // TODO
+tags.set(['logo', 'imconv', 'convert', 'image', 'svg']) // TODO
 //noinspection GroovyUnusedAssignment
 license = 'Apache-2.0'
 //noinspection GroovyUnusedAssignment
@@ -37,7 +37,8 @@ contacts {
 }
 
 dependencies {
-  api group: 'org.ysb33r.gradle', name: 'grolifant', version: '[0.8, 1['
+  implementation group: 'com.sharneng', name: 'gm4java', version: '[1, 2['
+  // implementation group: 'org.ysb33r.gradle', name: 'grolifant', version: '[0.8, 1['
 }
 
 gradlePlugin {
