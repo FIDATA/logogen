@@ -1,14 +1,23 @@
-.gradle
-/build/
+# Gradle
+.gradle/
+gradle.properties
+build/
 
-# Ignore Gradle GUI config
-gradle-app.setting
+# GFM Viewer
+.*.md.html
 
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
+# IDEA User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries/
 
-# Cache of project
-.gradletasknamecache
+# IDEA Legacy Project Format
+*.iws
 
-# # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
-# gradle/wrapper/gradle-wrapper.properties
+# IDEA Gradle
+*.iml
+.idea/**/gradle.xml
+
+# GPGKeyImport
+.scoped-gpg/
