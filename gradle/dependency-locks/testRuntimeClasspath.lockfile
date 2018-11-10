@@ -8,3 +8,5 @@ org.apache.maven:maven-artifact:3.0.3
 org.codehaus.plexus:plexus-utils:2.0.6
 org.hamcrest:hamcrest-core:1.3
 org.slf4j:slf4j-api:1.7.2
+org.tukaani:xz:1.6
+org.ysb33r.gradle:grolifant:0.9

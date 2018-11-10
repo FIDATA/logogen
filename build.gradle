@@ -38,7 +38,7 @@ contacts {
 
 dependencies {
   implementation group: 'com.sharneng', name: 'gm4java', version: '[1, 2['
-  // implementation group: 'org.ysb33r.gradle', name: 'grolifant', version: '[0.8, 1['
+  implementation group: 'org.ysb33r.gradle', name: 'grolifant', version: '[0.8, 1['
 }
 
 gradlePlugin {
