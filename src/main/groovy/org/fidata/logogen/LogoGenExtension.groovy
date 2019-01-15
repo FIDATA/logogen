@@ -12,6 +12,10 @@ class LogoGenExtension {
   final RegularFileProperty srcFile
   final Property<Color> background
 
+  void setBackground(String background) {
+    this.@background.set Color.decode(background)
+  }
+
   @Inject
   LogoGenExtension(ObjectFactory objectFactory, ProjectLayout projectLayout) {
     background = objectFactory.property(Color)
