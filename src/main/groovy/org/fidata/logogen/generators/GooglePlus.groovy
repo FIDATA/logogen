@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 /*
- * GitHub Organization Profile Picture Generator
+ * GooglePlus Community Photo Generator
  * Copyright © 2015, 2018-2019  Basil Peace
  *
  * This file is part of Logo Generator.
@@ -22,23 +22,21 @@ package org.fidata.logogen.generators
 import groovy.transform.CompileStatic
 
 /**
- * GitHub Organization Profile Picture
+ * GooglePlus Community Photo
  *
- * File format: PNG/JPG/GIF
- * Size: 500
+ * File format: JPG/GIF/PNG ?
+ * Size: 250
  *
  * References:
- * 1. How do I set up my profile picture?
- *    https://help.github.com/articles/how-do-i-set-up-my-profile-picture/
  */
 @CompileStatic
-final class GitHub extends LogoResizeAndConvertGenerator {
-  GitHub() {
-    super(500, 'png')
+final class GooglePlus extends LogoResizeAndConvertGenerator {
+  GooglePlus() {
+    super(250, 'png')
   }
 
   @Override
   String getGeneratorName() {
-    'github'
+    'google_plus'
   }
 }

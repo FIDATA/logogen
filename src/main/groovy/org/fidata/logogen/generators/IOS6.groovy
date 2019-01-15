@@ -16,7 +16,6 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
  * implied. See the License for the specific language governing
  * permissions and limitations under the License.
- */
 /*
    OS X App Icon
 
@@ -24,7 +23,7 @@
    Directory/file layout:
    Sizes in dp: 16, 32, 128, 256, 512
    Default density: 72
-   Density factors: 1, 2
+   Density factors: 1.0, 2.0
 
    References:
    1. Designing App Icons
@@ -40,36 +39,22 @@
    to create .icns file - see [2].
 */
 
-LogoGenerator('OSX') { srcFile, includeDir, outputDir, debug ->
-  outputDir = file("$outputDir/icon.iconset")
-  def commands = []
-
-  def sizes = [16, 32, 128, 256, 512]
-  def defDensity = 72
-  def densityFactors = [1, 2]
-  for (densityFactor in densityFactors) {
-    def outputFiles = []
-
-    def args = [imconv,
-    ] + (debug ? ['-verbose'] : []) + [
-      '-background', 'none',
-      '-density', densityFactor * defDensity,
-      '-units', 'pixelsperinch',
-      srcFile,
-    ]
-    sizes.eachWithIndex { size, i ->
-      def outputFile = file("$outputDir/icon_${size}x${size}" + (densityFactor > 1 ? "@${densityFactor}x" : '') + '.png')
-      def last = (i == (sizes.size() - 1))
-      size *= densityFactor
-      args += (last ? [] : ['(',
-        '-clone', '0']) +
-        ['-resize', "${size}x${size}"] +
-        (last ? [] : ['-write']) + [outputFile] +
-        (last ? [] : ['+delete', ')'])
-      outputFiles.push outputFile
-    }
-    commands.push([type: Exec, commandLine: args, outputFiles: outputFiles])
+LogoGenerator('iOS6') { srcFile, includeDir, outputDir, debug ->
+  def size = 120
+  Properties binding = new Properties()
+  file(srcFile + '.properties').withInputStream {
+    binding.load(it)
   }
 
-  return commands
+  def outputFile = file("$outputDir/${project.group}.png")
+  def args = [imconv,
+  ] + (debug ? ['-verbose'] : []) + [
+    '-background', "\"${binding['BackgroundColor']}\"",
+    '-units', 'pixelsperinch',
+    srcFile,
+    '-resize', "${size}x${size}",
+    outputFile
+  ]
+
+  return [[type: Exec, commandLine: args, outputFiles: [outputFile]]]
 }

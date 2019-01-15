@@ -37,12 +37,18 @@ contacts {
 }
 
 dependencies {
+  implementation group: 'commons-io', name: 'commons-io', version: '[2, 3['
+  implementation group: 'com.google.guava', name: 'guava', version: '27.0-jre'
   implementation group: 'com.sharneng', name: 'gm4java', version: '[1, 2['
   implementation group: 'org.ysb33r.gradle', name: 'grolifant', version: '[0.8, 1['
 }
 
 gradlePlugin {
   plugins {
+    logogenBasePlugin {
+      id = 'org.fidata.logogen-base'
+      implementationClass = 'org.fidata.logogen.LogoGenBasePlugin' // TODO: gradle package ?
+    }
     logogenPlugin {
       id = 'org.fidata.logogen'
       implementationClass = 'org.fidata.logogen.LogoGenPlugin' // TODO: gradle package ?
@@ -53,10 +59,10 @@ gradlePlugin {
 stutter {
   sparse = true
   java(8) {
-    compatibleRange '2.10'
+    compatibleRange '4.9'
   }
   java(9) {
-    compatibleRange '2.10'
+    compatibleRange '4.9'
   }
 }
 

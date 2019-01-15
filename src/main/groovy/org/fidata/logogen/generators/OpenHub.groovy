@@ -1,51 +1,43 @@
 #!/usr/bin/env groovy
 /*
-   Open Hub Project Logo Generator
-   Copyright (C) 2015  Basil Peace
+ * Open Hub Project Logo Generator
+ * Copyright © 2015, 2018-2019  Basil Peace
+ *
+ * This file is part of Logo Generator.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+package org.fidata.logogen.generators
 
-   This file is part of Logo Generator.
+import groovy.transform.CompileStatic
 
-   Redistribution and use, with or without modification, are permitted
-   provided that the following condition is met:
+/**
+ * Open Hub Project Logo
+ *
+ * File format: GIF/JPG/PNG
+ * Size: 64
+ *
+ * References:
+ * 1. https://www.openhub.net/p/{project}/logos/new
+ */
+@CompileStatic
+final class OpenHub extends LogoResizeAndConvertGenerator {
+  OpenHub() {
+    super(64, 'png')
+  }
 
-    1. Redistributions of this code must retain the above copyright
-       notice, this condition and the following disclaimer.
-
-   THIS SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR
-   IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
-   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
-   OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-   (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
-   DAMAGE. */
-
-/*
-   Open Hub Project Logo
-
-   File format: GIF/JPG/PNG
-   Size: 64
-
-   References:
-   1. https://www.openhub.net/p/{project}/logos/new
-*/
-
-LogoGenerator('OpenHub') { srcFile, includeDir, outputDir, debug ->
-	def size = 64
-
-	def outputFile = file("$outputDir/${project.group}.png")
-	def args = [imconv,
-		] + (debug ? ['-verbose'] : []) + [
-		'-background', 'none',
-		'-units', 'pixelsperinch',
-		srcFile,
-		'-resize', "${size}x${size}",
-		outputFile
-	]
-
-	return [[type: Exec, commandLine: args, outputFiles: [outputFile]]]
+  @Override
+  String getGeneratorName() {
+    'openhub'
+  }
 }
