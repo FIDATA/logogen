@@ -50,6 +50,7 @@ final class LogoGenPlugin implements Plugin<Project> {
       TaskProvider<LogoGenerator> logoGeneratorProvider = project.tasks.register(id, logoGeneratorClass) { LogoGenerator logoGenerator ->
         logoGenerator.group = LifecycleBasePlugin.BUILD_GROUP
         logoGenerator.srcFile.set extension.srcFile
+        logoGenerator.outputDir.set project.layout.buildDirectory.dir(id)
       }
       rootTaskProvider.configure { Task rootTask ->
         rootTask.dependsOn logoGeneratorProvider
