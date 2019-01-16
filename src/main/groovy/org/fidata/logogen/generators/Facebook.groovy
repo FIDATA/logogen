@@ -20,6 +20,9 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.gradle.workers.WorkerExecutor
+
+import javax.inject.Inject
 
 /**
  * Facebook Profile Picture
@@ -31,8 +34,9 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 final class Facebook extends LogoResizeAndConvertGenerator {
-  Facebook() {
-    super(180, 'png')
+  @Inject
+  Facebook(WorkerExecutor workerExecutor) {
+    super(workerExecutor, 180, 'png')
   }
 
   @Override

@@ -20,6 +20,9 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.gradle.workers.WorkerExecutor
+
+import javax.inject.Inject
 
 /**
  * Gravatar Image
@@ -33,8 +36,9 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 final class Gravatar extends LogoResizeAndConvertGenerator {
-  Gravatar() {
-    super(2048, 'png')
+  @Inject
+  Gravatar(WorkerExecutor workerExecutor) {
+    super(workerExecutor, 2048, 'png')
   }
 
   @Override

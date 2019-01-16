@@ -20,6 +20,9 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.gradle.workers.WorkerExecutor
+
+import javax.inject.Inject
 
 /**
  * Open Hub Project Logo
@@ -32,8 +35,9 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 final class OpenHub extends LogoResizeAndConvertGenerator {
-  OpenHub() {
-    super(64, 'png')
+  @Inject
+  OpenHub(WorkerExecutor workerExecutor) {
+    super(workerExecutor, 64, 'png')
   }
 
   @Override

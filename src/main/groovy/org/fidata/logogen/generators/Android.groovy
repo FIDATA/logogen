@@ -1,4 +1,19 @@
 #!/usr/bin/env groovy
+import com.google.common.collect.ImmutableMap
+import groovy.transform.CompileStatic
+import groovy.transform.InheritConstructors
+import org.fidata.logogen.generators.LogoGenerator
+import org.gradle.api.Action
+import org.gradle.api.logging.LogLevel
+import org.gradle.api.tasks.TaskAction
+import org.gradle.workers.IsolationMode
+import org.gradle.workers.WorkerConfiguration
+import org.gradle.workers.WorkerExecutor
+import org.im4java.core.IMOperation
+
+import javax.inject.Inject
+import java.math.MathContext
+
 /*
  * Android Launcher Icon Generator
  * Copyright © 2015, 2018-2019  Basil Peace
@@ -45,90 +60,55 @@
    7. http://developer.android.com/reference/android/R.mipmap.html
    8. http://tekeye.biz/2013/android-icon-size
 */
+@CompileStatic
+final class Android extends LogoGenerator {
+  private final WorkerExecutor workerExecutor
+  private final int size
+  private final String format
+  private final Integer density
 
-LogoGenerator('Android') { srcFile, includeDir, outputDir, debug ->
-  def commands = []
-
-  def sizeDP = 48
-  def defDensity = 160
-  def densityFactors = [
-    'ldpi':    0.75,
-    'mdpi':    1.0,
-    'tvdpi':   1.33,
-    'hdpi':    1.5,
-    'xhdpi':   2.0,
-    'xxhdpi':  3.0,
-    'xxxhdpi': 4.0,
-  ]
-
-  for (densityFactor in densityFactors) {
-    def outputFile = file("$outputDir/res/mipmap-${densityFactor.key}/ic_launcher.png")
-    def size = Math.round(densityFactor.value * sizeDP)
-    def args = [
-      imconv,
-    ] + (debug ? ['-verbose'] : []) + [
-      '-background', 'none',
-      '-density', densityFactor.value * defDensity,
-      '-units', 'pixelsperinch',
-      srcFile,
-      '-resize', "${size}x${size}",
-      outputFile
-    ]
-    commands.push([type: Exec, commandLine: args, outputFiles: [outputFile]])
+  @InheritConstructors
+  final static class ImageMagickAndroidRunnable extends LogoGenerator.ImageMagickConvertRunnable {
+    private static final BigDecimal SIZE_DP = 48
+    private static final BigDecimal DEF_DENSITY = 160
+    private static final Map<String, BigDecimal> DENSITY_FACTORS = ImmutableMap.copyOf([
+      'ldpi':    0.75,
+      'mdpi':    1.0,
+      'tvdpi':   1.33,
+      'hdpi':    1.5,
+      'xhdpi':   2.0,
+      'xxhdpi':  3.0,
+      'xxxhdpi': 4.0,
+    ])
+    @Override
+    protected void configureOperation(IMOperation operation) {
+      operation.background('none')
+      DENSITY_FACTORS.each { String densityName, BigDecimal densityValue ->
+        String outputFile = "$outputDir/res/mipmap-${densityName}/ic_launcher.png" // TODO
+        int size = (densityValue * SIZE_DP).round(MathContext.UNLIMITED).intValueExact()
+        operation.openOperation()
+        operation.units('pixelsperinch')
+        operation.density((densityValue * DEF_DENSITY).round(MathContext.UNLIMITED).intValueExact())
+        operation.resize(size, size)
+        operation.addImage(outputFile)
+        operation.closeOperation()
+      }
+    }
   }
 
-  return commands
-}
-
-LogoGenerator('Android-pre3.0') { srcFile, includeDir, outputDir, debug ->
-  def commands = []
-
-  def sizeDP = 48
-  def defDensity = 160
-  def densityFactors = [
-    'ldpi':    0.75,
-    'mdpi':    1.0,
-    'tvdpi':   1.33,
-    'hdpi':    1.5,
-    'xhdpi':   2.0,
-    'xxhdpi':  3.0,
-    'xxxhdpi': 4.0,
-  ]
-
-  for (densityFactor in densityFactors) {
-    def outputFile = file("$outputDir/res/drawable-${densityFactor.key}/ic_launcher.png")
-    def size = Math.round(densityFactor.value * sizeDP)
-    def args = [
-      imconv,
-    ] + (debug ? ['-verbose'] : []) + [
-      '-background', 'none',
-      '-density', densityFactor.value * defDensity,
-      '-units', 'pixelsperinch',
-      srcFile,
-      '-resize', "${size}x${size}",
-      outputFile
-    ]
-    commands.push([type: Exec, commandLine: args, outputFiles: [outputFile]])
+  @Inject
+  Android(WorkerExecutor workerExecutor) {
+    this.@workerExecutor = workerExecutor
   }
 
-  return commands
-}
-
-LogoGenerator('Android-1.5') { srcFile, includeDir, outputDir, debug ->
-  def size = 48
-  def density = 160
-
-  def outputFile = file("$outputDir/res/drawable/ic_launcher.png")
-  def args = [
-    imconv,
-  ] + (debug ? ['-verbose'] : []) + [
-    '-background', 'none',
-    '-density', density,
-    '-units', 'pixelsperinch',
-    srcFile,
-    '-resize', "${size}x${size}",
-    outputFile
-  ]
-
-  return [[type: Exec, commandLine: args, outputFiles: [outputFile]]]
+  @TaskAction
+  protected final void resizeAndConvert() {
+    workerExecutor.submit(ImageMagickAndroidRunnable, new Action<WorkerConfiguration>() {
+      @Override
+      void execute(WorkerConfiguration workerConfiguration) {
+        workerConfiguration.isolationMode = IsolationMode.NONE
+        workerConfiguration.params(srcFile, (project.logging.level ?: project.gradle.startParameter.logLevel) <= LogLevel.DEBUG)
+      }
+    })
+  }
 }

@@ -20,6 +20,9 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.gradle.workers.WorkerExecutor
+
+import javax.inject.Inject
 
 /**
  * VK Profile Photo
@@ -33,8 +36,9 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 final class VK extends LogoResizeAndConvertGenerator {
-  VK() {
-    super(200, 'png')
+  @Inject
+  VK(WorkerExecutor workerExecutor) {
+    super(workerExecutor, 200, 'png')
   }
 
   @Override

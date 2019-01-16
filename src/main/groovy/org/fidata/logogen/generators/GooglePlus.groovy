@@ -20,6 +20,9 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.gradle.workers.WorkerExecutor
+
+import javax.inject.Inject
 
 /**
  * GooglePlus Community Photo
@@ -31,8 +34,9 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 final class GooglePlus extends LogoResizeAndConvertGenerator {
-  GooglePlus() {
-    super(250, 'png')
+  @Inject
+  GooglePlus(WorkerExecutor workerExecutor) {
+    super(workerExecutor, 250, 'png')
   }
 
   @Override

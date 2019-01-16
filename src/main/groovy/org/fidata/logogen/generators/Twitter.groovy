@@ -20,6 +20,9 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.gradle.workers.WorkerExecutor
+
+import javax.inject.Inject
 
 /**
  * Twitter Profile Photo
@@ -31,8 +34,9 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 final class Twitter extends LogoResizeAndConvertGenerator {
-  Twitter() {
-    super(400, 'png')
+  @Inject
+  Twitter(WorkerExecutor workerExecutor) {
+    super(workerExecutor, 400, 'png')
   }
 
   @Override

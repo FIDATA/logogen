@@ -7,6 +7,11 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.process.ExecSpec
+import org.im4java.core.ConvertCmd
+import org.im4java.core.IMOperation
+
+import javax.inject.Inject
 
 /*
    name
@@ -43,11 +48,38 @@ abstract class LogoGenerator extends DefaultTask {
 
   abstract String getGeneratorName()
 
-  protected final void exec(List<String> commandLine) {
-    ext.imconv = "$System.env.IMCONV"
+  abstract static class ImageMagickConvertRunnable implements Runnable {
+    private static final ConvertCmd CONVERT_CMD = new ConvertCmd()
 
+    private final String srcFile
+    private final boolean debug
 
+    @Inject
+    ImageMagickConvertRunnable(String srcFile, boolean debug = false) {
+      this.@srcFile = srcFile
+      this.@debug = debug
+    }
+
+    @Override
+    void run() {
+      IMOperation operation = new IMOperation()
+      operation.addImage(srcFile)
+      if (debug) {
+        operation.verbose()
+      }
+      configureOperation operation
+      CONVERT_CMD.run(operation)
+    }
+
+    protected abstract void configureOperation(IMOperation operation)
   }
+
+  protected final void exec(List<String> commandLine) {
+    project.exec { ExecSpec execSpec ->
+      execSpec.commandLine = commandLine
+    }
+  }
+
   protected final void copy(Object into, Closure rename) {
     project.copy { CopySpec copySpec ->
       copySpec.from srcFile

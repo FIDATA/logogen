@@ -20,6 +20,9 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.gradle.workers.WorkerExecutor
+
+import javax.inject.Inject
 
 /**
  * Windows Store App Tile Icon
@@ -34,8 +37,9 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 final class WindowsStore extends LogoResizeAndConvertGenerator {
-  WindowsStore() {
-    super(300, 'png', 96)
+  @Inject
+  WindowsStore(WorkerExecutor workerExecutor) {
+    super(workerExecutor, 300, 'png', 96)
   }
 
   @Override

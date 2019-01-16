@@ -20,6 +20,9 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.gradle.workers.WorkerExecutor
+
+import javax.inject.Inject
 
 /**
  * GitHub Organization Profile Picture
@@ -33,8 +36,9 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 final class GitHub extends LogoResizeAndConvertGenerator {
-  GitHub() {
-    super(500, 'png')
+  @Inject
+  GitHub(WorkerExecutor workerExecutor) {
+    super(workerExecutor, 500, 'png')
   }
 
   @Override

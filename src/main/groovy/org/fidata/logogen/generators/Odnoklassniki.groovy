@@ -20,6 +20,9 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.gradle.workers.WorkerExecutor
+
+import javax.inject.Inject
 
 /**
  * Odnoklassniki Profile Photo
@@ -31,8 +34,9 @@ import groovy.transform.CompileStatic
  */
 @CompileStatic
 final class Odnoklassniki extends LogoResizeAndConvertGenerator {
-  Odnoklassniki() {
-    super(190, 'png')
+  @Inject
+  Odnoklassniki(WorkerExecutor workerExecutor) {
+    super(workerExecutor, 190, 'png')
   }
 
   @Override
