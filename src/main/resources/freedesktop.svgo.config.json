@@ -35,6 +35,6 @@
 		{ transformsWithOnePath: false },
 		{ removeDimensions: false },
 		{ removeAttrs: { attrs: "(font-size|font-family|letter-spacing|word-spacing|style)" } },
-		{ addClassesToSVGElement: false },
-	],
+		{ addClassesToSVGElement: false }
+	]
 }
