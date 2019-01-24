@@ -1,6 +1,12 @@
 package org.fidata.logogen.generators
 
-class AndroidPre30 {
+import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
+
+@CompileStatic
+class AndroidPre30 extends LogoGenerator {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('androidPre3.0', AndroidPre30)
+
   LogoGenerator('Android-pre3.0') { srcFile, includeDir, outputDir, debug ->
     def commands = []
 

@@ -1,5 +1,9 @@
 package org.fidata.logogen.generators
 
+import com.google.common.io.Resources
+import groovy.text.Template
+import groovy.text.TemplateEngine
+import groovy.text.XmlTemplateEngine
 import groovy.transform.CompileStatic
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.CopySpec
@@ -7,10 +11,8 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
-import org.gradle.process.ExecSpec
 import org.im4java.core.ConvertCmd
 import org.im4java.core.IMOperation
-
 import javax.inject.Inject
 
 /*
@@ -46,8 +48,6 @@ abstract class LogoGenerator extends DefaultTask {
   @OutputDirectory
   final DirectoryProperty outputDir = newOutputDirectory()
 
-  abstract String getGeneratorName()
-
   abstract static class ImageMagickConvertRunnable implements Runnable {
     private static final ConvertCmd CONVERT_CMD = new ConvertCmd()
 
@@ -74,11 +74,30 @@ abstract class LogoGenerator extends DefaultTask {
     protected abstract void configureOperation(IMOperation operation)
   }
 
-  protected final void exec(List<String> commandLine) {
+  abstract static class GenerateTemplateRunnable implements Runnable {
+    private static final TemplateEngine TEMPLATE_ENGINE = new XmlTemplateEngine()
+    private final Template template
+    private final File outputFile
+
+    @Inject
+    GenerateTemplateRunnable(String resourceName, File outputFile) {
+      this.@template = TEMPLATE_ENGINE.createTemplate(Resources.getResource(resourceName))
+      this.@outputFile = outputFile
+    }
+
+    @Override
+    void run() {
+      outputFile.text = template.make(bindings)
+    }
+
+    abstract protected Map getBindings()
+  }
+
+  /*protected final void exec(List<String> commandLine) {
     project.exec { ExecSpec execSpec ->
       execSpec.commandLine = commandLine
     }
-  }
+  }*/
 
   protected final void copy(Object into, Closure rename) {
     project.copy { CopySpec copySpec ->

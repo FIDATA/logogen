@@ -17,12 +17,22 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-// How to Make a Favicon
-// http://blog.teamtreehouse.com/how-to-make-a-favicon
-// Pinned Sites: Windows 7 Desktop Integration with Internet Explorer 9
-// https://msdn.microsoft.com/ru-RU/library/gg131029.aspx
-// https://msdn.microsoft.com/library/gg491740(v=vs.85).aspx
+package org.fidata.logogen.generators
+
+import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
+
+/**
+ * How to Make a Favicon
+ * http://blog.teamtreehouse.com/how-to-make-a-favicon
+ * Pinned Sites: Windows 7 Desktop Integration with Internet Explorer 9
+ * https://msdn.microsoft.com/ru-RU/library/gg131029.aspx
+ * https://msdn.microsoft.com/library/gg491740(v=vs.85).aspx
+ */
+@CompileStatic
 LogoGenerator('Favicon') { srcFile, includeDir, outputDir, debug ->
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('favicon', Favicon)
+
   def sizes = [16, 24, 32, 48, 64]
 
   def outputFile = file("$outputDir/favicon.ico")

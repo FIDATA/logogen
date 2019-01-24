@@ -20,8 +20,8 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.workers.WorkerExecutor
-
 import javax.inject.Inject
 
 /**
@@ -34,13 +34,10 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class GooglePlus extends LogoResizeAndConvertGenerator {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('googlePlus', GooglePlus)
+
   @Inject
   GooglePlus(WorkerExecutor workerExecutor) {
     super(workerExecutor, 250, 'png')
-  }
-
-  @Override
-  String getGeneratorName() {
-    'google_plus'
   }
 }

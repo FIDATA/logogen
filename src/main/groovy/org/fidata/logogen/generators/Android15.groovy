@@ -1,6 +1,12 @@
 package org.fidata.logogen.generators
 
-class Android15 {
+import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
+
+@CompileStatic
+class Android15 extends LogoGenerator {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android1.5', Android15)
+
   LogoGenerator('Android-1.5') { srcFile, includeDir, outputDir, debug ->
     def size = 48
     def density = 160

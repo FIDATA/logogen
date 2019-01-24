@@ -20,8 +20,8 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.workers.WorkerExecutor
-
 import javax.inject.Inject
 
 /**
@@ -36,13 +36,10 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class GitHub extends LogoResizeAndConvertGenerator {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('github', GitHub)
+
   @Inject
   GitHub(WorkerExecutor workerExecutor) {
     super(workerExecutor, 500, 'png')
-  }
-
-  @Override
-  String getGeneratorName() {
-    'github'
   }
 }

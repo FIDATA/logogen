@@ -19,42 +19,57 @@
  */
 package org.fidata.logogen
 
+import com.google.common.collect.ImmutableList
 import groovy.transform.CompileStatic
 import org.fidata.logogen.generators.*
+import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.NamedDomainObjectFactory
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
 @CompileStatic
 final class LogoGenBasePlugin implements Plugin<Project> {
-  public static final Map<String, Class<LogoGenerator>> GENERATORS = ImmutableMap.copyOf([
-    android: Android,
-    appStore: AppStore,
-    facebook: Facebook,
-    favicon: Favicon,
-    freeDesktop: FreeDesktop,
-    github: GitHub,
-    googlePlay: GooglePlay,
-    googlePlus: GooglePlus,
-    gravatar: Gravatar,
-    iOS: IOS,
-    iOS6: IOS6,
-    launchPad: LaunchPad,
-    odnoklassniki: Odnoklassniki,
-    openHub: OpenHub,
-    osx: OSX,
-    tritter: Twitter,
-    vk: VK,
-    windowsMainIcon: WindowsMainIcon,
-    windowsPhone: WindowsPhone,
-    windowsStore: WindowsStore,
-    windowsTiles: WindowsTiles,
-    windowsTilesForDestopApp: WindowsTilesForDesktopApp,
+  private NamedDomainObjectContainer<LogoGeneratorDescriptor> generators
+
+  NamedDomainObjectContainer<LogoGeneratorDescriptor> getGenerators() {
+    this.@generators
+  }
+
+  private static final List<LogoGeneratorDescriptor> DEFAULT_GENERATORS = ImmutableList.copyOf([
+    Android.DESCRIPTOR,
+    AndroidPre30.DESCRIPTOR,
+    Android15.DESCRIPTOR,
+    Facebook.DESCRIPTOR,
+    Favicon.DESCRIPTOR,
+    FreeDesktop.DESCRIPTOR,
+    GitHub.DESCRIPTOR,
+    GooglePlus.DESCRIPTOR,
+    Gravatar.DESCRIPTOR,
+    Ios.DESCRIPTOR,
+    Ios6.DESCRIPTOR,
+    LaunchPad.DESCRIPTOR,
+    Odnoklassniki.DESCRIPTOR,
+    OpenHub.DESCRIPTOR,
+    Osx.DESCRIPTOR,
+    Twitter.DESCRIPTOR,
+    VKontakte.DESCRIPTOR,
+    WindowsMainIcon.DESCRIPTOR,
+    WindowsPhone.DESCRIPTOR,
+    WindowsStore.DESCRIPTOR,
+    WindowsTiles.DESCRIPTOR,
+    WindowsTilesForDesktopApp.DESCRIPTOR,
+    WindowsTilesForPinnedWebsite.DESCRIPTOR,
   ])
 
   @Override
   void apply(Project project) {
-    GENERATORS.values().each { Class<LogoGenerator> logoGeneratorClass ->
+    this.@generators = project.container(LogoGeneratorDescriptor, (NamedDomainObjectFactory)null)
+
+    generators.configureEach { LogoGeneratorDescriptor descriptor ->
+      Class<? extends LogoGenerator> logoGeneratorClass = descriptor.generatorClass
       project.extensions.extraProperties[logoGeneratorClass.simpleName] = logoGeneratorClass
     }
+
+    generators.addAll DEFAULT_GENERATORS
   }
 }

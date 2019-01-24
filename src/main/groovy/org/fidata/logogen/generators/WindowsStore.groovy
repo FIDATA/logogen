@@ -20,6 +20,7 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.workers.WorkerExecutor
 
 import javax.inject.Inject
@@ -37,13 +38,10 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class WindowsStore extends LogoResizeAndConvertGenerator {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsStore', WindowsStore)
+
   @Inject
   WindowsStore(WorkerExecutor workerExecutor) {
     super(workerExecutor, 300, 'png', 96)
-  }
-
-  @Override
-  String getGeneratorName() {
-    'windows_store'
   }
 }

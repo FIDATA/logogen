@@ -17,6 +17,11 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+package org.fidata.logogen.generators
+
+import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
+
 /*
    Free Desktop
 
@@ -47,8 +52,10 @@
    4. Tango Icon Theme Guidelines
       http://tango.freedesktop.org/Tango_Icon_Theme_Guidelines
 */
-
+@CompileStatic
 LogoGenerator('FreeDesktop') { srcFile, includeDir, outputDir, debug ->
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('freeDesktop', FreeDesktop)
+
   outputDir = "$outputDir/hicolor"
   def commands = []
   def outputFiles = []

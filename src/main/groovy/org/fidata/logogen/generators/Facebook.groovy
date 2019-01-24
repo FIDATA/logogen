@@ -20,8 +20,8 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.workers.WorkerExecutor
-
 import javax.inject.Inject
 
 /**
@@ -34,13 +34,10 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class Facebook extends LogoResizeAndConvertGenerator {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('facebook', Facebook)
+
   @Inject
   Facebook(WorkerExecutor workerExecutor) {
     super(workerExecutor, 180, 'png')
-  }
-
-  @Override
-  String getGeneratorName() {
-    'facebook'
   }
 }

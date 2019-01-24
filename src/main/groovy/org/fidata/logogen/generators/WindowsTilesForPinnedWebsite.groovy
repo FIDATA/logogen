@@ -1,5 +1,3 @@
-package org.fidata.logogen.generators
-
 /*
    Windows Tiles for Pinned Website
 
@@ -25,10 +23,16 @@ package org.fidata.logogen.generators
    6. Высококачественные визуальные элементы для закрепленных сайтов в Windows 8
       http://blogs.msdn.com/b/ie_ru/archive/2012/06/08/high-quality-visuals-for-pinned-sites-in-windows-8.aspx
 */
+package org.fidata.logogen.generators
 
 import groovy.text.*
+import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
 
+@CompileStatic
 LogoGenerator('WindowsTilesForPinnedWebsite') { srcFile, includeDir, outputDir, debug ->
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsTilesForPinnedWebsite', WindowsTilesForPinnedWebsite)
+
   def commands = []
   def outputFiles = []
 

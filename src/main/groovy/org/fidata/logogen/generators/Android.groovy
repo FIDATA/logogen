@@ -1,19 +1,4 @@
 #!/usr/bin/env groovy
-import com.google.common.collect.ImmutableMap
-import groovy.transform.CompileStatic
-import groovy.transform.InheritConstructors
-import org.fidata.logogen.generators.LogoGenerator
-import org.gradle.api.Action
-import org.gradle.api.logging.LogLevel
-import org.gradle.api.tasks.TaskAction
-import org.gradle.workers.IsolationMode
-import org.gradle.workers.WorkerConfiguration
-import org.gradle.workers.WorkerExecutor
-import org.im4java.core.IMOperation
-
-import javax.inject.Inject
-import java.math.MathContext
-
 /*
  * Android Launcher Icon Generator
  * Copyright © 2015, 2018-2019  Basil Peace
@@ -32,6 +17,22 @@ import java.math.MathContext
  * implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+package org.fidata.logogen.generators
+
+import com.google.common.collect.ImmutableMap
+import groovy.transform.CompileStatic
+import groovy.transform.InheritConstructors
+import org.fidata.logogen.LogoGeneratorDescriptor
+import org.gradle.api.Action
+import org.gradle.api.logging.LogLevel
+import org.gradle.api.tasks.TaskAction
+import org.gradle.workers.IsolationMode
+import org.gradle.workers.WorkerConfiguration
+import org.gradle.workers.WorkerExecutor
+import org.im4java.core.IMOperation
+import javax.inject.Inject
+import java.math.MathContext
+
 /*
    Android Launcher Icon
 
@@ -62,10 +63,9 @@ import java.math.MathContext
 */
 @CompileStatic
 final class Android extends LogoGenerator {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android', Android)
+
   private final WorkerExecutor workerExecutor
-  private final int size
-  private final String format
-  private final Integer density
 
   @InheritConstructors
   final static class ImageMagickAndroidRunnable extends LogoGenerator.ImageMagickConvertRunnable {

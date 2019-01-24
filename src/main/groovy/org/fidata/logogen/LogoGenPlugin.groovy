@@ -35,7 +35,7 @@ final class LogoGenPlugin implements Plugin<Project> {
 
   @Override
   void apply(Project project) {
-    project.plugins.apply LogoGenBasePlugin
+    LogoGenBasePlugin basePlugin = project.plugins.apply(LogoGenBasePlugin)
 
     LogoGenExtension extension = project.extensions.create(EXTENSION_NAME, LogoGenExtension)
 
@@ -46,11 +46,11 @@ final class LogoGenPlugin implements Plugin<Project> {
       }
     }
 
-    LogoGenBasePlugin.GENERATORS.each { String id, Class<LogoGenerator> logoGeneratorClass ->
-      TaskProvider<LogoGenerator> logoGeneratorProvider = project.tasks.register(id, logoGeneratorClass) { LogoGenerator logoGenerator ->
+    basePlugin.generators.configureEach { LogoGeneratorDescriptor descriptor ->
+      TaskProvider<LogoGenerator> logoGeneratorProvider = project.tasks.register(descriptor.name, descriptor.generatorClass) { LogoGenerator logoGenerator ->
         logoGenerator.group = LifecycleBasePlugin.BUILD_GROUP
         logoGenerator.srcFile.set extension.srcFile
-        logoGenerator.outputDir.set project.layout.buildDirectory.dir(id)
+        logoGenerator.outputDir.set project.layout.buildDirectory.dir(descriptor.name)
       }
       rootTaskProvider.configure { Task rootTask ->
         rootTask.dependsOn logoGeneratorProvider

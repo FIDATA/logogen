@@ -16,6 +16,12 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
  * implied. See the License for the specific language governing
  * permissions and limitations under the License.
+ */
+package org.fidata.logogen.generators
+
+import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
+
 /*
    OS X App Icon
 
@@ -38,8 +44,10 @@
    during compilation for specific target version. Xcode is also able
    to create .icns file - see [2].
 */
-
+@CompileStatic
 LogoGenerator('iOS6') { srcFile, includeDir, outputDir, debug ->
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('ios6', Ios6)
+
   def size = 120
   Properties binding = new Properties()
   file(srcFile + '.properties').withInputStream {

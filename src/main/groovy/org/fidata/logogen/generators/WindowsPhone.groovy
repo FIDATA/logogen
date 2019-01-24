@@ -17,6 +17,11 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+package org.fidata.logogen.generators
+
+import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
+
 /*
    LaunchPad Team Images
 
@@ -26,8 +31,10 @@
    References:
    
 */
-
+@CompileStatic
 LogoGenerator('WindowsPhone') { srcFile, includeDir, outputDir, debug ->
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsPhone', WindowsPhone)
+
   def outputFiles = []
 
   def sizes = [

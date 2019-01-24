@@ -17,6 +17,11 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+package org.fidata.logogen.generators
+
+import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
+
 /*
    Windows Application Icon (MAINICON)
 
@@ -46,8 +51,10 @@
    5. Setting Window.Icon to Vista 256x256 PNG icon causes a FileFormatException
       https://social.msdn.microsoft.com/Forums/vstudio/en-US/9e723d51-0e26-4609-8fe1-5e0edcf7385b/setting-windowicon-to-vista-256x256-png-icon-causes-a-fileformatexception?forum=wpf
 */
-
+@CompileStatic
 LogoGenerator('WindowsMAINICON') { srcFile, includeDir, outputDir, debug ->
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsMainIcon', WindowsMainIcon)
+
   def sizes = [/*768, 512,*/ 256, 96, 72, 64, 60, 48, 40, 32, 24, 20, 16]
 
   def outputFile = file("$outputDir/MAINICON.ico")

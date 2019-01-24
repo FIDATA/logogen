@@ -17,6 +17,11 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
+package org.fidata.logogen.generators
+
+import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
+
 /*
    OS X App Icon
 
@@ -34,13 +39,16 @@
    3. https://forum.xojo.com/13390-create-icns-file/p4#p106375
    
    Notes:
-   This task doesn't create .icns file. Use `iconutil` under MAC.
-   Accorging to [3], it is recommended and intended to generate .icns
-   during compilation for specific target version. Xcode is also able
-   to create .icns file - see [2].
+   This task doesn't create .icns file.
+   According to [3], it is recommended and intended to generate .icns
+   during compilation for specific target version.
+   Use `iconutil` under MAC.
+   Xcode is also able to create .icns file - see [2].
 */
-
+@CompileStatic
 LogoGenerator('OSX') { srcFile, includeDir, outputDir, debug ->
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('osx', Osx)
+
   outputDir = file("$outputDir/icon.iconset")
   def commands = []
 

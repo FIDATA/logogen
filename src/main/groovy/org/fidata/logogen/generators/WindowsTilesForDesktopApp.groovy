@@ -33,10 +33,16 @@
    2. How to name resources using qualifiers (HTML)
       https://msdn.microsoft.com/en-us/library/windows/apps/hh965372.aspx
 */
+package org.fidata.logogen.generators
 
 import groovy.text.*
+import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
 
+@CompileStatic
 LogoGenerator('WindowsTilesForDesktopApp') { srcFile, includeDir, outputDir, debug ->
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsTilesForDesktopApp', WindowsTilesForDesktopApp)
+
   def commands = []
 
   def sizesDP = [70, 150]

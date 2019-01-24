@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 /*
- * VK Profile Photo Generator
+ * VKontakte Profile Photo Generator
  * Copyright © 2015, 2018-2019  Basil Peace
  *
  * This file is part of Logo Generator.
@@ -20,12 +20,12 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.workers.WorkerExecutor
-
 import javax.inject.Inject
 
 /**
- * VK Profile Photo
+ * VKontakte Profile Photo
  *
  * File format: JPG/GIF/PNG
  * Size: 200 (width) x 500 (height)
@@ -35,14 +35,11 @@ import javax.inject.Inject
  * 2. https://vk.com/page-11770709_44565679
  */
 @CompileStatic
-final class VK extends LogoResizeAndConvertGenerator {
-  @Inject
-  VK(WorkerExecutor workerExecutor) {
-    super(workerExecutor, 200, 'png')
-  }
+final class VKontakte extends LogoResizeAndConvertGenerator {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('vkontakte', VKontakte)
 
-  @Override
-  String getGeneratorName() {
-    'vk'
+  @Inject
+  VKontakte(WorkerExecutor workerExecutor) {
+    super(workerExecutor, 200, 'png')
   }
 }

@@ -20,8 +20,8 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.workers.WorkerExecutor
-
 import javax.inject.Inject
 
 /**
@@ -35,13 +35,10 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class OpenHub extends LogoResizeAndConvertGenerator {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('openhub', OpenHub)
+
   @Inject
   OpenHub(WorkerExecutor workerExecutor) {
     super(workerExecutor, 64, 'png')
-  }
-
-  @Override
-  String getGeneratorName() {
-    'openhub'
   }
 }

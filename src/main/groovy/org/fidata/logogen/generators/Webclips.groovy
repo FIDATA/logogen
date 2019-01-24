@@ -1,6 +1,12 @@
 package org.fidata.logogen.generators
 
+import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorDescriptor
+
+@CompileStatic
 LogoGenerator('webclips') { srcFile, includeDir, outputDir, debug ->
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('webclips', Webclips)
+
   def outputFiles = []
 
   def sizes = [60, 76, 120, 152]
