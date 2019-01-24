@@ -21,13 +21,8 @@ package org.fidata.logogen.generators
 
 import com.google.common.collect.ImmutableMap
 import groovy.transform.CompileStatic
-import groovy.transform.InheritConstructors
 import org.fidata.logogen.LogoGeneratorDescriptor
-import org.gradle.api.Action
-import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
-import org.gradle.workers.IsolationMode
-import org.gradle.workers.WorkerConfiguration
 import org.gradle.workers.WorkerExecutor
 import org.im4java.core.IMOperation
 import javax.inject.Inject
@@ -67,8 +62,7 @@ final class Android extends LogoGenerator {
 
   private final WorkerExecutor workerExecutor
 
-  @InheritConstructors
-  final static class ImageMagickAndroidRunnable extends LogoGenerator.ImageMagickConvertRunnable {
+  final static class ImageMagickConvertOperation extends LogoGenerator.ImageMagickConvertOperation {
     private static final BigDecimal SIZE_DP = 48
     private static final BigDecimal DEF_DENSITY = 160
     private static final Map<String, BigDecimal> DENSITY_FACTORS = ImmutableMap.copyOf([
@@ -80,19 +74,39 @@ final class Android extends LogoGenerator {
       'xxhdpi':  3.0,
       'xxxhdpi': 4.0,
     ])
+
+    public static final String RES_DIR_NAME = 'res'
+
+    private final File outputDir
+
+    ImageMagickConvertOperation(File srcFile, boolean debug, File outputDir) {
+      super(srcFile, debug)
+      this.@outputDir = outputDir
+    }
+
     @Override
-    protected void configureOperation(IMOperation operation) {
+    protected IMOperation getOperation() {
+      File resOutputDir = new File(outputDir, RES_DIR_NAME)
+
+      IMOperation operation = new IMOperation()
       operation.background('none')
+
       DENSITY_FACTORS.each { String densityName, BigDecimal densityValue ->
-        String outputFile = "$outputDir/res/mipmap-${densityName}/ic_launcher.png" // TODO
+        File densityOutputDir = new File(resOutputDir, "mipmap-${densityName}")
+        assert densityOutputDir.mkdirs()
+        String outputFile = new File(densityOutputDir, 'ic_launcher.png').toString()
+
         int size = (densityValue * SIZE_DP).round(MathContext.UNLIMITED).intValueExact()
         operation.openOperation()
-        operation.units('pixelsperinch')
-        operation.density((densityValue * DEF_DENSITY).round(MathContext.UNLIMITED).intValueExact())
-        operation.resize(size, size)
-        operation.addImage(outputFile)
+          .clone(0)
+          .units('pixelsperinch')
+          .density((densityValue * DEF_DENSITY).round(MathContext.UNLIMITED).intValueExact())
+          .resize(size, size)
+          .write(outputFile)
         operation.closeOperation()
       }
+      operation.delete('0--1')
+      operation
     }
   }
 
@@ -102,13 +116,7 @@ final class Android extends LogoGenerator {
   }
 
   @TaskAction
-  protected final void resizeAndConvert() {
-    workerExecutor.submit(ImageMagickAndroidRunnable, new Action<WorkerConfiguration>() {
-      @Override
-      void execute(WorkerConfiguration workerConfiguration) {
-        workerConfiguration.isolationMode = IsolationMode.NONE
-        workerConfiguration.params(srcFile, (project.logging.level ?: project.gradle.startParameter.logLevel) <= LogLevel.DEBUG)
-      }
-    })
+  protected void resizeAndConvert() {
+    imageMagicConvert workerExecutor, ImageMagickConvertOperation, outputDir.get().asFile
   }
 }

@@ -1,11 +1,7 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
-import org.gradle.api.Action
-import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
-import org.gradle.workers.IsolationMode
-import org.gradle.workers.WorkerConfiguration
 import org.gradle.workers.WorkerExecutor
 import org.im4java.core.IMOperation
 import javax.inject.Inject
@@ -17,13 +13,13 @@ abstract class LogoResizeAndConvertGenerator extends LogoGenerator {
   private final String format
   private final Integer density
 
-  final static class ImageMagickResizeAndConvertRunnable extends LogoGenerator.ImageMagickConvertRunnable {
+  final static class ImageMagickResizeAndConvertOperation extends LogoGenerator.ImageMagickConvertOperation {
     private final int size
     private final String format
     private final Integer density
 
     @Inject
-    ImageMagickResizeAndConvertRunnable(String srcFile, boolean debug, int size, String format, Integer density) {
+    ImageMagickResizeAndConvertOperation(String srcFile, boolean debug, int size, String format, Integer density) {
       super(srcFile, debug)
       this.@size = size
       this.@format = format
@@ -51,12 +47,6 @@ abstract class LogoResizeAndConvertGenerator extends LogoGenerator {
 
   @TaskAction
   protected final void resizeAndConvert() {
-    workerExecutor.submit(ImageMagickResizeAndConvertRunnable, new Action<WorkerConfiguration>() {
-      @Override
-      void execute(WorkerConfiguration workerConfiguration) {
-        workerConfiguration.isolationMode = IsolationMode.NONE
-        workerConfiguration.params(srcFile, (project.logging.level ?: project.gradle.startParameter.logLevel) <= LogLevel.DEBUG, size, format, density)
-      }
-    })
+    imageMagicConvert(workerExecutor, ImageMagickResizeAndConvertOperation, size, format, density)
   }
 }

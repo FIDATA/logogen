@@ -5,15 +5,22 @@ import groovy.text.Template
 import groovy.text.TemplateEngine
 import groovy.text.XmlTemplateEngine
 import groovy.transform.CompileStatic
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.logging.LogLevel
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.workers.IsolationMode
+import org.gradle.workers.WorkerConfiguration
+import org.gradle.workers.WorkerExecutor
 import org.im4java.core.ConvertCmd
 import org.im4java.core.IMOperation
 import javax.inject.Inject
+import org.gradle.api.tasks.TaskAction
 
 /*
    name
@@ -40,47 +47,66 @@ import javax.inject.Inject
      as name of application/project/organization
      logo is being created for
 */
+@CacheableTask
 @CompileStatic
 abstract class LogoGenerator extends DefaultTask {
   @InputFile
-  final RegularFileProperty srcFile = newInputFile()
+  final RegularFileProperty srcFile = project.objects.fileProperty()
 
   @OutputDirectory
-  final DirectoryProperty outputDir = newOutputDirectory()
+  final DirectoryProperty outputDir = project.objects.directoryProperty()
 
-  abstract static class ImageMagickConvertRunnable implements Runnable {
+  /**
+   * Class expressing ImageMagick {@code convert} operation
+   *
+   * <b>Constructor of class inheriting this one should have
+   * {@code srcFile} and {@code debug} as first two arguments
+   * and pass them to {@code super} constructor.
+   * All other arguments may be placed after these two.</b>
+   */
+  abstract static class ImageMagickConvertOperation implements Runnable {
     private static final ConvertCmd CONVERT_CMD = new ConvertCmd()
 
-    private final String srcFile
+    private final File srcFile
     private final boolean debug
 
     @Inject
-    ImageMagickConvertRunnable(String srcFile, boolean debug = false) {
+    ImageMagickConvertOperation(File srcFile, boolean debug = false) {
       this.@srcFile = srcFile
       this.@debug = debug
     }
 
     @Override
-    void run() {
+    final void run() {
       IMOperation operation = new IMOperation()
-      operation.addImage(srcFile)
       if (debug) {
         operation.verbose()
       }
-      configureOperation operation
+      // operation.define('stream:buffer-size=0') // We may need this to avoid cache problems
+      operation.addImage(srcFile.toString())
+      operation.addSubOperation(this.operation)
       CONVERT_CMD.run(operation)
     }
 
-    protected abstract void configureOperation(IMOperation operation)
+    /**
+     * Gets actual operation done on image.
+     * Should be implemented by classes inheriting this one
+     */
+    protected abstract IMOperation getOperation()
   }
 
-  abstract static class GenerateTemplateRunnable implements Runnable {
+  /**
+   * Class expressing generation of XML file from existing template.
+   * Template should be placed in resources, and implementation
+   * should pass resource name as a first argument to {@code super} constructor
+   */
+  abstract static class GenerateXmlOperation implements Runnable {
     private static final TemplateEngine TEMPLATE_ENGINE = new XmlTemplateEngine()
     private final Template template
     private final File outputFile
 
     @Inject
-    GenerateTemplateRunnable(String resourceName, File outputFile) {
+    GenerateXmlOperation(String resourceName, File outputFile) {
       this.@template = TEMPLATE_ENGINE.createTemplate(Resources.getResource(resourceName))
       this.@outputFile = outputFile
     }
@@ -98,6 +124,44 @@ abstract class LogoGenerator extends DefaultTask {
       execSpec.commandLine = commandLine
     }
   }*/
+
+  /**
+   * Adds {@link ImageMagickConvertOperation} instance to specified {@link WorkerExecutor}.
+   * This should be called from method marked with {@link TaskAction}
+   * in generator implementation.
+   *
+   * @param workerExecutor {@link WorkerExecutor} which will run the operation
+   * @param actionClass Actual operation class extending {@link ImageMagickConvertOperation}
+   * @param params Params to pass to {@code actionClass} constructor
+   */
+  protected void imageMagicConvert(WorkerExecutor workerExecutor, Class<? extends ImageMagickConvertOperation> actionClass, Object... params) {
+    workerExecutor.submit(actionClass, new Action<WorkerConfiguration>() {
+      @Override
+      void execute(WorkerConfiguration workerConfiguration) {
+        workerConfiguration.isolationMode = IsolationMode.NONE
+        workerConfiguration.params(srcFile.get().asFile, (project.logging.level ?: project.gradle.startParameter.logLevel) <= LogLevel.DEBUG, *params)
+      }
+    })
+  }
+
+  /**
+   * Adds {@link GenerateXmlOperation} instance to specified {@link WorkerExecutor}.
+   * This should be called from method marked with {@link TaskAction}
+   * in generator implementation.
+   *
+   * @param workerExecutor {@link WorkerExecutor} which will run the operation
+   * @param actionClass Actual operation class extending {@link ImageMagickConvertOperation}
+   * @param params Params to pass to {@code actionClass} constructor
+   */
+  protected void generateXml(WorkerExecutor workerExecutor, Class<? extends GenerateXmlOperation> actionClass, Object... params) {
+    workerExecutor.submit(actionClass, new Action<WorkerConfiguration>() {
+      @Override
+      void execute(WorkerConfiguration workerConfiguration) {
+        workerConfiguration.isolationMode = IsolationMode.NONE
+        workerConfiguration.params(*params)
+      }
+    })
+  }
 
   protected final void copy(Object into, Closure rename) {
     project.copy { CopySpec copySpec ->

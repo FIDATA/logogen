@@ -22,7 +22,6 @@ package org.fidata.logogen.generators
 import groovy.transform.CompileStatic
 import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.api.Action
-import org.gradle.api.logging.LogLevel
 import org.gradle.api.tasks.TaskAction
 import com.google.common.collect.ImmutableList
 import org.gradle.workers.IsolationMode
@@ -50,9 +49,9 @@ import java.math.MathContext
 */
 @CompileStatic
 final class WindowsTiles extends LogoGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsTiles', WindowsTiles)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsTiles', org.fidata.logogen.generators.WindowsTiles)
 
-  static final class ImageMagicConvertRunnable extends LogoGenerator.ImageMagickConvertRunnable {
+  static final class ImageMagicConvertOperation extends LogoGenerator.ImageMagickConvertOperation {
     private static final List<BigDecimal> SIZES_DP = ImmutableList.of(
       70.0,
       150.0
@@ -100,9 +99,9 @@ final class WindowsTiles extends LogoGenerator {
     }
   }
 
-  static final class GenerateTemplateRunnable extends LogoGenerator.GenerateTemplateRunnable {
+  static final class GenerateXmlOperation extends LogoGenerator.GenerateXmlOperation {
     @Inject
-    GenerateTemplateRunnable() {
+    GenerateXmlOperation() {
       super('VisualElementsManifest.xml.gsp')
     }
 
@@ -122,14 +121,14 @@ final class WindowsTiles extends LogoGenerator {
 
   @TaskAction
   protected final void generate() {
-    workerExecutor.submit(ImageMagicConvertRunnable, new Action<WorkerConfiguration>() {
+    workerExecutor.submit(ImageMagicConvertOperation, new Action<WorkerConfiguration>() {
       @Override
       void execute(WorkerConfiguration workerConfiguration) {
         workerConfiguration.isolationMode = IsolationMode.NONE
-        workerConfiguration.params(srcFile, (project.logging.level ?: project.gradle.startParameter.logLevel) <= LogLevel.DEBUG)
+        workerConfiguration.params(srcFile, debug)
       }
     })
-    workerExecutor.submit(GenerateTemplateRunnable, new Action<WorkerConfiguration>() {
+    workerExecutor.submit(GenerateXmlOperation, new Action<WorkerConfiguration>() {
       @Override
       void execute(WorkerConfiguration workerConfiguration) {
         workerConfiguration.isolationMode = IsolationMode.NONE
