@@ -60,7 +60,7 @@ LogoGenerator('WindowsTilesForDesktopApp') { srcFile, includeDir, outputDir, deb
     ] + (debug ? ['-verbose'] : []) + [
       '-background', 'none',
       '-density', densityFactor * defDensity,
-      '-units', 'pixelsperinch',
+      '-units', Units.PIXELSPERINCH.toString(),
       srcFile,
     ]
     sizesDP.eachWithIndex { sizeDP, i ->

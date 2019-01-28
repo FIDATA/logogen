@@ -71,7 +71,7 @@ final class WindowsTiles extends LogoGenerator {
         String outputFile = "$outputDir/res/mipmap-${densityName}/ic_launcher.png" // TODO
         int size = (densityValue * SIZE_DP).round(MathContext.UNLIMITED).intValueExact()
         operation.openOperation()
-        operation.units('pixelsperinch')
+        operation.units(Units.PIXELSPERINCH.toString())
         operation.density((densityValue * DEF_DENSITY).round(MathContext.UNLIMITED).intValueExact())
         operation.resize(size, size)
         operation.addImage(outputFile)
@@ -80,7 +80,7 @@ final class WindowsTiles extends LogoGenerator {
 
 
         '-density', densityFactor * defDensity,
-        '-units', 'pixelsperinch',
+        '-units', Units.PIXELSPERINCH.toString(),
         srcFile,
       ]
       sizesDP.eachWithIndex { sizeDP, i ->
@@ -148,7 +148,7 @@ LogoGenerator('WindowsTiles') { srcFile, includeDir, outputDir, debug ->
     ] + (debug ? ['-verbose'] : []) + [
       '-background', 'none',
       '-density', densityFactor * defDensity,
-      '-units', 'pixelsperinch',
+      '-units', Units.PIXELSPERINCH.toString(),
       srcFile,
     ]
     sizesDP.eachWithIndex { sizeDP, i ->

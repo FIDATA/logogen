@@ -1,3 +1,22 @@
+#!/usr/bin/env groovy
+/*
+ * LogoGenerator Gradle task class
+ * Copyright © 2015, 2018-2019  Basil Peace
+ *
+ * This file is part of Logo Generator.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ * implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
 package org.fidata.logogen.generators
 
 import com.google.common.io.Resources
@@ -22,54 +41,46 @@ import org.im4java.core.IMOperation
 import javax.inject.Inject
 import org.gradle.api.tasks.TaskAction
 
-/*
-   name
-     Name of generator. Used in names of tasks and output directory
-   configureClosure
-     Configuration closure
-     Parameters:
-       srcFile    Source file
-       outputDir  Output directory
-       debug      Boolean indicator of debug/verbose mode
-     Return: array of maps with the following fields:
-       type        (required)                  Class of task.
-                                               Currently only generic
-                                               Task, Exec and Copy
-                                               classes are supported
-       doLast      (required for type == Task) task action
-       commandLine (required for type == Exec) command line for
-                                               execution
-       outputFiles (required for type == Exec) output files
-       into        (required for type == Copy) output directory
-       rename      (required for type == Copy) output file
-
-   For filenames generators may use Gradle's project.group
-     as name of application/project/organization
-     logo is being created for
-*/
+/**
+ * Logo Generator takes a logo in SVG format
+ * and generates an image in format required
+ * by target operating system, website or service,
+ * and also auxiliary files
+ */
 @CacheableTask
 @CompileStatic
 abstract class LogoGenerator extends DefaultTask {
+  /**
+   * Source file
+   */
   @InputFile
   final RegularFileProperty srcFile = project.objects.fileProperty()
 
+  /**
+   * Output directory
+   */
   @OutputDirectory
   final DirectoryProperty outputDir = project.objects.directoryProperty()
 
   /**
-   * Class expressing ImageMagick {@code convert} operation
+   * ImageMagick {@code convert} operation
    *
    * <b>Constructor of class inheriting this one should have
    * {@code srcFile} and {@code debug} as first two arguments
    * and pass them to {@code super} constructor.
    * All other arguments may be placed after these two.</b>
    */
-  abstract static class ImageMagickConvertOperation implements Runnable {
+  abstract protected static class ImageMagickConvertOperation implements Runnable {
     private static final ConvertCmd CONVERT_CMD = new ConvertCmd()
 
     private final File srcFile
     private final boolean debug
 
+    /**
+     *
+     * @param srcFile
+     * @param debug
+     */
     @Inject
     ImageMagickConvertOperation(File srcFile, boolean debug = false) {
       this.@srcFile = srcFile
@@ -96,11 +107,11 @@ abstract class LogoGenerator extends DefaultTask {
   }
 
   /**
-   * Class expressing generation of XML file from existing template.
+   * Generation of XML file from existing template.
    * Template should be placed in resources, and implementation
    * should pass resource name as a first argument to {@code super} constructor
    */
-  abstract static class GenerateXmlOperation implements Runnable {
+  abstract protected static class GenerateXmlOperation implements Runnable {
     private static final TemplateEngine TEMPLATE_ENGINE = new XmlTemplateEngine()
     private final Template template
     private final File outputFile
@@ -126,7 +137,7 @@ abstract class LogoGenerator extends DefaultTask {
   }*/
 
   /**
-   * Adds {@link ImageMagickConvertOperation} instance to specified {@link WorkerExecutor}.
+   * Adds {@link ImageMagickConvertOperation} to specified {@link WorkerExecutor}.
    * This should be called from method marked with {@link TaskAction}
    * in generator implementation.
    *
@@ -145,12 +156,12 @@ abstract class LogoGenerator extends DefaultTask {
   }
 
   /**
-   * Adds {@link GenerateXmlOperation} instance to specified {@link WorkerExecutor}.
+   * Adds {@link GenerateXmlOperation} to specified {@link WorkerExecutor}.
    * This should be called from method marked with {@link TaskAction}
    * in generator implementation.
    *
    * @param workerExecutor {@link WorkerExecutor} which will run the operation
-   * @param actionClass Actual operation class extending {@link ImageMagickConvertOperation}
+   * @param actionClass Actual operation class extending {@link GenerateXmlOperation}
    * @param params Params to pass to {@code actionClass} constructor
    */
   protected void generateXml(WorkerExecutor workerExecutor, Class<? extends GenerateXmlOperation> actionClass, Object... params) {

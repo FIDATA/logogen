@@ -55,7 +55,7 @@ LogoGenerator('iOS') { srcFile, includeDir, outputDir, debug ->
   ] + (debug ? ['-verbose'] : []) + [
     '-background', "\"${binding['BackgroundColor']}\"",
     '-density', defDensity,
-    '-units', 'pixelsperinch',
+    '-units', Units.PIXELSPERINCH.toString(),
     srcFile,
   ]
   sizes.eachWithIndex { size, i ->
@@ -77,7 +77,7 @@ LogoGenerator('iOS') { srcFile, includeDir, outputDir, debug ->
   ] + (debug ? ['-verbose'] : []) + [
     '-background', 'none',
     '-density', 2 * defDensity,
-    '-units', 'pixelsperinch',
+    '-units', Units.PIXELSPERINCH.toString(),
     srcFile,
   ]
   sizes.eachWithIndex { size, i ->
@@ -100,7 +100,7 @@ LogoGenerator('iOS') { srcFile, includeDir, outputDir, debug ->
       // '-verbose',
       '-background', 'none',
       '-density', str(defResolutionValue),
-      '-units', 'pixelsperinch',
+      '-units', Units.PIXELSPERINCH.toString(),
       srcFilename,
       '-resize', "${size}x${size}",
       "$outputDir/CFBundleIconFile_" + String.format('%dx%d.png', size, size)
@@ -109,7 +109,7 @@ LogoGenerator('iOS') { srcFile, includeDir, outputDir, debug ->
       // '-verbose',
       '-background', 'none',
       '-density', str(defResolutionValue * 2),
-      '-units', 'pixelsperinch',
+      '-units', Units.PIXELSPERINCH.toString(),
       srcFilename,
       '-resize', "${size}x${size}",
       "$outputDir/CFBundleIconFile_" + String.format('%dx%d@2x.png', size, size),

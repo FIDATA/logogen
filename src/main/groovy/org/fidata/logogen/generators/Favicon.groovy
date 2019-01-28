@@ -39,7 +39,7 @@ LogoGenerator('Favicon') { srcFile, includeDir, outputDir, debug ->
   def args = [imconv,
   ] + (debug ? ['-verbose'] : []) + [
     '-background', 'none',
-    '-units', 'pixelsperinch',
+    '-units', Units.PIXELSPERINCH.toString(),
     srcFile
   ]
   for (size in sizes)

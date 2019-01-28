@@ -15,7 +15,7 @@ LogoGenerator('webclips') { srcFile, includeDir, outputDir, debug ->
   ] + (debug ? ['-verbose'] : []) + [
     '-background', 'none',
     '-density', '96',
-    '-units', 'pixelsperinch',
+    '-units', Units.PIXELSPERINCH.toString(),
     srcFile,
   ]
   sizes.eachWithIndex { size, i ->

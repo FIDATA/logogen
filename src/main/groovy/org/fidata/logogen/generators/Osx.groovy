@@ -62,7 +62,7 @@ LogoGenerator('OSX') { srcFile, includeDir, outputDir, debug ->
     ] + (debug ? ['-verbose'] : []) + [
       '-background', 'none',
       '-density', densityFactor * defDensity,
-      '-units', 'pixelsperinch',
+      '-units', Units.PIXELSPERINCH.toString(),
       srcFile,
     ]
     sizes.eachWithIndex { size, i ->

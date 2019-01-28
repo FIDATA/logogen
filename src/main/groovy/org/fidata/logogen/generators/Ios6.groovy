@@ -58,7 +58,7 @@ LogoGenerator('iOS6') { srcFile, includeDir, outputDir, debug ->
   def args = [imconv,
   ] + (debug ? ['-verbose'] : []) + [
     '-background', "\"${binding['BackgroundColor']}\"",
-    '-units', 'pixelsperinch',
+    '-units', Units.PIXELSPERINCH.toString(),
     srcFile,
     '-resize', "${size}x${size}",
     outputFile

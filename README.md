@@ -1,42 +1,62 @@
 Logo Generator
 ==============
 
-Generation of logo in all known formats
+This tool takes a source of a logo in SVG format
+and produces images and auxilliary files
+for a variety of target operating systems, websites and social networks.
+
+It is implemented as a plugin
+for [Gradle](https://gradle.org) build system
+and is actually a wrapper
+around [ImageMagick](https://www.imagemagick.org/).
+
+The goal of this tool is to produce logos
+with the least time and effort.
+Its target audience includes open source projects without a budget,
+and startup projects.
+It can also be used to generate placeholder icons.
+This tool doesn't replace a human designer
+who can manually polish a logo for specific icon size
+and other requirements. It is just a cheap alternative.
 
 Usage
 -----
-Requirements:
-*	ImageMagick
 
-	Download page:
-http://www.imagemagick.org/script/binary-releases.php.
+1.  As it is a wrapper around ImageMagick,
+    the latter should be installed
 
-	Environment variables: `IMCONV` should point to ImageMagick's
-`convert` executable (see
-http://www.imagemagick.org/Usage/windows/#convert_issue for
-detailed description of issue).
+2.  Application and configuration of plugin:
 
-Additional notes and references for developers
-----------------------------------------------
-*	Some image formats, including PNG, store embedded information about
-dot density (aka DPI). Wrong DPI sometimes causes problem. Examples:
-	*
-http://www.hanselman.com/blog/BeAwareOfDPIWithImagePNGsInWPFImagesScaleWeirdOrAreBlurry.aspx
-	*	http://habrahabr.ru/post/216833/#part3
-	
-	Default didplay resolution is 96 dpi, and that value should be set
-in metadata of all images.
-*	Inkscape exports images as 90 dpi, so it can't be used for building.
-*	Some operating systems provide High DPI mode.
-*	Required and recommended sizes of icons with respect to High DPI
-mode:
-	
-*	Additional reading:
-	*
-https://blog.qt.digia.com/blog/2013/04/25/retina-display-support-for-mac-os-ios-and-x11/
+    ```
+    plugins {
+      id 'org.fidata.logogen' version '0.1.0'
+    }
+
+    logogen {
+      srcFile = file('src/main/svg/logo.svg')
+      background = '#CCFFEE'
+    }
+    ```
+
+    Both configuration options are required.
+
+    `background` option is used in the cases
+    when opaque background is required.
+
+Custom Generators
+-----------------
+
+User can implement custom logo generator, extending
+[LogoGenerator](src/main/groovy/org/fidata/logogen/generators/LogoGenerator.groovy)
+class.
+
+Custom generator could be registered in `LogoGenBasePlugin.generators`
+collection, then the plugin
+will create a task of this type automatically.
+
 
 ------------------------------------------------------------------------
-Copyright © 2014, 2018  Basil Peace
+Copyright Â© 2014, 2018-2019  Basil Peace
 
 This is part of Logo Generator.
 

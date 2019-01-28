@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 /*
- * org.fidata.logogen Gradle plugin
- * Copyright © 2015, 2018  Basil Peace
+ * org.fidata.logogen Gradle Project plugin
+ * Copyright © 2015, 2018-2019  Basil Peace
  *
  * This file is part of Logo Generator.
  *
@@ -27,12 +27,24 @@ import org.gradle.api.Task
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 
+/**
+ * org.fidata.logogen Gradle Project plugin
+ */
 @CompileStatic
 final class LogoGenPlugin implements Plugin<Project> {
+  /**
+   * Name of logogen root task
+   */
   public static final String ROOT_TASK_NAME = 'logogen'
 
+  /**
+   * Name of logogen extension for {@link Project}
+   */
   public static final String EXTENSION_NAME = 'logogen'
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   void apply(Project project) {
     LogoGenBasePlugin basePlugin = project.plugins.apply(LogoGenBasePlugin)
@@ -47,7 +59,7 @@ final class LogoGenPlugin implements Plugin<Project> {
     }
 
     basePlugin.generators.configureEach { LogoGeneratorDescriptor descriptor ->
-      TaskProvider<LogoGenerator> logoGeneratorProvider = project.tasks.register(descriptor.name, descriptor.generatorClass) { LogoGenerator logoGenerator ->
+      TaskProvider<LogoGenerator> logoGeneratorProvider = project.tasks.register(descriptor.name, descriptor.implementationClass) { LogoGenerator logoGenerator ->
         logoGenerator.group = LifecycleBasePlugin.BUILD_GROUP
         logoGenerator.srcFile.set extension.srcFile
         logoGenerator.outputDir.set project.layout.buildDirectory.dir(descriptor.name)
@@ -67,6 +79,12 @@ final class LogoGenPlugin implements Plugin<Project> {
         2. ArtifactoryPublish & plugications
        */
       // TODO: webclips ??
+    }
+
+    basePlugin.generators.whenObjectRemoved { LogoGeneratorDescriptor descriptor ->
+      project.tasks.withType(descriptor.implementationClass).named(descriptor.name).configure { LogoGenerator logoGenerator ->
+        logoGenerator.enabled = false
+      }
     }
   }
 }

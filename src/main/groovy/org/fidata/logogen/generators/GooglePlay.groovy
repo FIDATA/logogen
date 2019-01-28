@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 /*
- * VKontakte Profile Photo Generator
- * Copyright © 2015, 2018-2019  Basil Peace
+ * GooglePlay High-Res Icon Generator
+ * Copyright © 2019  Basil Peace
  *
  * This file is part of Logo Generator.
  *
@@ -25,21 +25,23 @@ import org.gradle.workers.WorkerExecutor
 import javax.inject.Inject
 
 /**
- * VKontakte Profile Photo
+ * GooglePlay High-Res Icon
  *
- * File format: JPG/GIF/PNG
- * Size: 200 (width) x 500 (height)
+ * File format: PNG
+ * Color depth: 32-bit with alpha
+ * Size: 512×512 px
+ * Maximum file size: 1024 KB
  *
- * References:
- * 1. https://vk.com/topic-68859379_30163629
- * 2. https://vk.com/page-11770709_44565679
+ * Reference:
+ * High-res icon // Graphic assets, screenshots, & video // Play Console Help
+ * https://support.google.com/googleplay/android-developer/answer/1078870
  */
 @CompileStatic
-final class VKontakte extends LogoResizeAndConvertGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('vkontakte', VKontakte)
+final class GooglePlay extends LogoResizeAndConvertGenerator {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('googlePlay', GooglePlay)
 
   @Inject
-  VKontakte(WorkerExecutor workerExecutor) {
-    super(workerExecutor, 200, 'png')
+  GooglePlay(WorkerExecutor workerExecutor) {
+    super(workerExecutor, 512, 'png')
   }
 }

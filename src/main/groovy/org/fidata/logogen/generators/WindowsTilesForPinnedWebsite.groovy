@@ -44,7 +44,7 @@ LogoGenerator('WindowsTilesForPinnedWebsite') { srcFile, includeDir, outputDir, 
   ] + (debug ? ['-verbose'] : []) + [
     '-background', 'none',
     '-density', densityFactor * defDensity,
-    '-units', 'pixelsperinch',
+    '-units', Units.PIXELSPERINCH.toString(),
     srcFile,
   ]
   sizes.each { size ->
