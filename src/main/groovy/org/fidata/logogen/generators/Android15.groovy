@@ -20,6 +20,7 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import groovy.transform.InheritConstructors
 import org.fidata.imagemagick.Units
 import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.api.tasks.TaskAction
@@ -53,11 +54,12 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class Android15 extends LogoGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android1.5', Android15)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android1.5', Android15, null)
 
   /**
    *
    */
+  @InheritConstructors
   protected static class ImageMagickConvertOperation extends LogoGenerator.ImageMagickConvertOperation {
     protected static final BigDecimal SIZE_DP = 48
     protected static final BigDecimal DEF_DENSITY = 160
@@ -66,16 +68,9 @@ final class Android15 extends LogoGenerator {
 
     public static final String IC_LAUNCHER_FILE_NAME = 'ic_launcher.png'
 
-    protected final File outputDir
-
-    ImageMagickConvertOperation(File srcFile, boolean debug, File outputDir) {
-      super(srcFile, debug)
-      this.@outputDir = outputDir
-    }
-
     @Override
     protected IMOperation getOperation() {
-      File drawableOutputDir = outputDir.toPath().resolve(RES_DIR_NAME).resolve('drawable').toFile()
+      File drawableOutputDir = super.outputDir.toPath().resolve(RES_DIR_NAME).resolve('drawable').toFile()
       assert drawableOutputDir.mkdirs()
       String outputFile = new File(drawableOutputDir, IC_LAUNCHER_FILE_NAME).toString()
 
@@ -102,6 +97,6 @@ final class Android15 extends LogoGenerator {
 
   @TaskAction
   protected void resizeAndConvert() {
-    imageMagicConvert workerExecutor, ImageMagickConvertOperation, outputDir.get().asFile
+    imageMagicConvert workerExecutor, ImageMagickConvertOperation
   }
 }

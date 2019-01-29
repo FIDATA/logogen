@@ -33,7 +33,7 @@ import org.fidata.logogen.LogoGeneratorDescriptor
 */
 @CompileStatic
 LogoGenerator('LaunchPad') { srcFile, includeDir, outputDir, debug ->
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('launchpad', LaunchPad)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('launchpad', LaunchPad, null)
 
   def outputFiles = []
 

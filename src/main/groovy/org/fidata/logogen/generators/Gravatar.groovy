@@ -36,7 +36,7 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class Gravatar extends LogoResizeAndConvertGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('gravatar', Gravatar)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('gravatar', Gravatar, null)
 
   @Inject
   Gravatar(WorkerExecutor workerExecutor) {

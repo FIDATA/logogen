@@ -36,7 +36,7 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class VKontakte extends LogoResizeAndConvertGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('vkontakte', VKontakte)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('vkontakte', VKontakte, null)
 
   @Inject
   VKontakte(WorkerExecutor workerExecutor) {

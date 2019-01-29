@@ -1,19 +1,15 @@
 package org.fidata.imagemagick.quantization.color
 
 import groovy.transform.CompileStatic
-import groovy.transform.KnownImmutable
+import groovy.transform.Immutable
 import org.gradle.api.tasks.InputFile
 import org.im4java.core.IMOperation
 
-@KnownImmutable
+@Immutable(knownImmutableClasses = [File])
 @CompileStatic
 final class PredefinedColorMap extends ColorReduction {
   @InputFile
   final File colorMap
-
-  PredefinedColorMap(File colorMap) {
-    this.@colorMap = colorMap
-  }
 
   @Override
   IMOperation toIMOperation() {

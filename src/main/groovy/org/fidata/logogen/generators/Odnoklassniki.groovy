@@ -34,7 +34,7 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class Odnoklassniki extends LogoResizeAndConvertGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('odnoklassniki', Odnoklassniki)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('odnoklassniki', Odnoklassniki, null)
 
   @Inject
   Odnoklassniki(WorkerExecutor workerExecutor) {

@@ -36,7 +36,7 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class GitHub extends LogoResizeAndConvertGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('github', GitHub)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('github', GitHub, null)
 
   @Inject
   GitHub(WorkerExecutor workerExecutor) {

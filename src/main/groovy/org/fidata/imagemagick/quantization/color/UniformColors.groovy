@@ -1,19 +1,15 @@
 package org.fidata.imagemagick.quantization.color
 
 import groovy.transform.CompileStatic
-import groovy.transform.KnownImmutable
+import groovy.transform.Immutable
 import org.gradle.api.tasks.Input
 import org.im4java.core.IMOperation
 
-@KnownImmutable
+@Immutable
 @CompileStatic
 final class UniformColors extends ColorReduction {
   @Input
   final Integer levels
-
-  UniformColors(Integer levels) {
-    this.@levels = levels
-  }
 
   @Override
   IMOperation toIMOperation() {

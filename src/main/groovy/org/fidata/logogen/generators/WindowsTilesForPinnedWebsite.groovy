@@ -31,7 +31,7 @@ import org.fidata.logogen.LogoGeneratorDescriptor
 
 @CompileStatic
 LogoGenerator('WindowsTilesForPinnedWebsite') { srcFile, includeDir, outputDir, debug ->
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsTilesForPinnedWebsite', WindowsTilesForPinnedWebsite)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsTilesForPinnedWebsite', WindowsTilesForPinnedWebsite, null)
 
   def commands = []
   def outputFiles = []

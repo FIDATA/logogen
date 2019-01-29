@@ -54,7 +54,7 @@ import org.fidata.logogen.LogoGeneratorDescriptor
 */
 @CompileStatic
 LogoGenerator('FreeDesktop') { srcFile, includeDir, outputDir, debug ->
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('freeDesktop', FreeDesktop)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('freeDesktop', FreeDesktop, null)
 
   outputDir = "$outputDir/hicolor"
   def commands = []

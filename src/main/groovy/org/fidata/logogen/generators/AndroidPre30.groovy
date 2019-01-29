@@ -57,7 +57,7 @@ import java.math.MathContext
  */
 @CompileStatic
 final class AndroidPre30 extends LogoGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('androidPre3.0', AndroidPre30)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('androidPre3.0', AndroidPre30, null)
 
   @InheritConstructors
   protected static class ImageMagickConvertOperation extends Android15.ImageMagickConvertOperation {
@@ -105,6 +105,6 @@ final class AndroidPre30 extends LogoGenerator {
 
   @TaskAction
   protected void resizeAndConvert() {
-    imageMagicConvert workerExecutor, ImageMagickConvertOperation, outputDir.get().asFile
+    imageMagicConvert workerExecutor, ImageMagickConvertOperation
   }
 }

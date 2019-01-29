@@ -38,7 +38,7 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class WindowsStore extends LogoResizeAndConvertGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsStore', WindowsStore)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsStore', WindowsStore, null)
 
   @Inject
   WindowsStore(WorkerExecutor workerExecutor) {

@@ -34,7 +34,7 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class GooglePlus extends LogoResizeAndConvertGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('googlePlus', GooglePlus)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('googlePlus', GooglePlus, null)
 
   @Inject
   GooglePlus(WorkerExecutor workerExecutor) {

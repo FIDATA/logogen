@@ -34,7 +34,7 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class Twitter extends LogoResizeAndConvertGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('twitter', Twitter)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('twitter', Twitter, null)
 
   @Inject
   Twitter(WorkerExecutor workerExecutor) {

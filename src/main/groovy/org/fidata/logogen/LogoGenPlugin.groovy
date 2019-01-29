@@ -24,6 +24,7 @@ import org.fidata.logogen.generators.LogoGenerator
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.internal.plugins.DslObject
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 
@@ -86,5 +87,7 @@ final class LogoGenPlugin implements Plugin<Project> {
         logoGenerator.enabled = false
       }
     }
+
+    new DslObject(project.extensions.getByType(LogoGenExtension)).extensions
   }
 }

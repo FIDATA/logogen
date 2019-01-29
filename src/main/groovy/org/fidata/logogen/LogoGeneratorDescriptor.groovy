@@ -38,4 +38,8 @@ final class LogoGeneratorDescriptor {
    * Class implementing generator
    */
   final Class<? extends LogoGenerator> implementationClass
+  /**
+   * Extension with configuration of generator
+   */
+  final Class<?> extensionClass
 }

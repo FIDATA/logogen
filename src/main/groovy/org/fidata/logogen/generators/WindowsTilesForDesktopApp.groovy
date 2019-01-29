@@ -41,7 +41,7 @@ import org.fidata.logogen.LogoGeneratorDescriptor
 
 @CompileStatic
 LogoGenerator('WindowsTilesForDesktopApp') { srcFile, includeDir, outputDir, debug ->
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsTilesForDesktopApp', WindowsTilesForDesktopApp)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsTilesForDesktopApp', WindowsTilesForDesktopApp, null)
 
   def commands = []
 

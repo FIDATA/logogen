@@ -33,7 +33,7 @@ import org.fidata.logogen.LogoGeneratorDescriptor
 */
 @CompileStatic
 LogoGenerator('WindowsPhone') { srcFile, includeDir, outputDir, debug ->
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsPhone', WindowsPhone)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsPhone', WindowsPhone, null)
 
   def outputFiles = []
 

@@ -6,7 +6,7 @@ and produces images and auxilliary files
 for a variety of target operating systems, websites and social networks.
 
 It is implemented as a plugin
-for [Gradle](https://gradle.org) build system
+for [Gradle](https://gradle.org) build tool
 and is actually a wrapper
 around [ImageMagick](https://www.imagemagick.org/).
 

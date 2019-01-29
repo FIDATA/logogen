@@ -38,7 +38,7 @@ import javax.inject.Inject
  */
 @CompileStatic
 final class GooglePlay extends LogoResizeAndConvertGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('googlePlay', GooglePlay)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('googlePlay', GooglePlay, null)
 
   @Inject
   GooglePlay(WorkerExecutor workerExecutor) {

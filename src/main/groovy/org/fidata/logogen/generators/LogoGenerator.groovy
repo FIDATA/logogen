@@ -66,15 +66,16 @@ abstract class LogoGenerator extends DefaultTask {
    * ImageMagick {@code convert} operation
    *
    * <b>Constructor of class inheriting this one should have
-   * {@code srcFile} and {@code debug} as first two arguments
+   * {@code srcFile}, {@code debug} and {@code outputDir} as first three arguments
    * and pass them to {@code super} constructor.
-   * All other arguments may be placed after these two.</b>
+   * All other arguments may be placed after these three.</b>
    */
   abstract protected static class ImageMagickConvertOperation implements Runnable {
     private static final ConvertCmd CONVERT_CMD = new ConvertCmd()
 
     private final File srcFile
     private final boolean debug
+    protected final File outputDir
 
     /**
      *
@@ -82,9 +83,10 @@ abstract class LogoGenerator extends DefaultTask {
      * @param debug
      */
     @Inject
-    ImageMagickConvertOperation(File srcFile, boolean debug = false) {
+    ImageMagickConvertOperation(File srcFile, boolean debug = false, File outputDir) {
       this.@srcFile = srcFile
       this.@debug = debug
+      this.@outputDir = outputDir
     }
 
     @Override
@@ -150,7 +152,7 @@ abstract class LogoGenerator extends DefaultTask {
       @Override
       void execute(WorkerConfiguration workerConfiguration) {
         workerConfiguration.isolationMode = IsolationMode.NONE
-        workerConfiguration.params(srcFile.get().asFile, (project.logging.level ?: project.gradle.startParameter.logLevel) <= LogLevel.DEBUG, *params)
+        workerConfiguration.params srcFile.get().asFile, (project.logging.level ?: project.gradle.startParameter.logLevel) <= LogLevel.DEBUG, outputDir.get().asFile, *params
       }
     })
   }
@@ -169,7 +171,7 @@ abstract class LogoGenerator extends DefaultTask {
       @Override
       void execute(WorkerConfiguration workerConfiguration) {
         workerConfiguration.isolationMode = IsolationMode.NONE
-        workerConfiguration.params(*params)
+        workerConfiguration.params *params
       }
     })
   }

@@ -1,10 +1,10 @@
 package org.fidata.imagemagick.quantization.color
 
 import groovy.transform.CompileStatic
-import groovy.transform.KnownImmutable
+import groovy.transform.Immutable
 import org.im4java.core.IMOperation
 
-@KnownImmutable
+@Immutable
 @CompileStatic
 abstract class ColorReduction implements Serializable {
   abstract IMOperation toIMOperation()
