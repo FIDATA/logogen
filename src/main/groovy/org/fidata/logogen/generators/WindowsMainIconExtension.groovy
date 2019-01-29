@@ -6,11 +6,12 @@ import org.fidata.imagemagick.Compress
 import org.fidata.imagemagick.quantization.color.ColorReduction
 import org.fidata.imagemagick.quantization.color.UniformColors
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.provider.SetProperty
 import org.gradle.util.ConfigureUtil
+import javax.inject.Inject
 
 @KnownImmutable
 @CompileStatic
@@ -35,24 +36,25 @@ final class WindowsMainIconExtension {
     }
   }
 
-  final ListProperty<Integer> sizes = objectFactory.listProperty(Integer).empty().convention(
+  final SetProperty<Integer> sizes = objectFactory.setProperty(Integer).empty().convention(
     [256, 96, 72, 64, 60, 48, 40, 32, 24, 20, 16]
   )
 
   final Property<Compress> compress = objectFactory.property(Compress).convention(Compress.NONE)
 
+  @Inject
   WindowsMainIconExtension(ProviderFactory providerFactory, ObjectFactory objectFactory) {
     this.@providerFactory = providerFactory
     this.@objectFactory = objectFactory
   }
 
   final static class ColorDepth {
-    final ListProperty<Integer> sizes
+    final SetProperty<Integer> sizes
 
     final Property<ColorReduction> reduction
 
-    ColorDepth(ObjectFactory objectFactory, ListProperty<Integer> defaultSizes) {
-      this.@sizes = objectFactory.listProperty(Integer).empty().convention(defaultSizes)
+    ColorDepth(ObjectFactory objectFactory, SetProperty<Integer> defaultSizes) {
+      this.@sizes = objectFactory.setProperty(Integer).empty().convention(defaultSizes)
       this.@reduction = objectFactory.property(ColorReduction)
     }
   }

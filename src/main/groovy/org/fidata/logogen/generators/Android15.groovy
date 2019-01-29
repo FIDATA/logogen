@@ -19,6 +19,7 @@
  */
 package org.fidata.logogen.generators
 
+import static org.fidata.android.AndroidUtils.*
 import groovy.transform.CompileStatic
 import groovy.transform.InheritConstructors
 import org.fidata.imagemagick.Units
@@ -63,10 +64,6 @@ final class Android15 extends LogoGenerator {
   protected static class ImageMagickConvertOperation extends LogoGenerator.ImageMagickConvertOperation {
     protected static final BigDecimal SIZE_DP = 48
     protected static final BigDecimal DEF_DENSITY = 160
-
-    public static final String RES_DIR_NAME = 'res'
-
-    public static final String IC_LAUNCHER_FILE_NAME = 'ic_launcher.png'
 
     @Override
     protected IMOperation getOperation() {

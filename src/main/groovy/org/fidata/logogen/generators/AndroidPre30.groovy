@@ -19,7 +19,7 @@
  */
 package org.fidata.logogen.generators
 
-import com.google.common.collect.ImmutableMap
+import static org.fidata.android.AndroidUtils.*
 import groovy.transform.CompileStatic
 import groovy.transform.InheritConstructors
 import org.fidata.imagemagick.Units
@@ -57,17 +57,10 @@ import java.math.MathContext
  */
 @CompileStatic
 final class AndroidPre30 extends LogoGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('androidPre3.0', AndroidPre30, null)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('androidPre3.0', AndroidPre30, AndroidPre30Extension)
 
   @InheritConstructors
   protected static class ImageMagickConvertOperation extends Android15.ImageMagickConvertOperation {
-    protected static final Map<String, BigDecimal> DENSITY_FACTORS = ImmutableMap.copyOf([
-      'ldpi':  0.75,
-      'mdpi':  1.0,
-      'hdpi':  1.5,
-      'xhdpi': 2.0,  // Added in API level 8
-    ])
-
     @Override
     protected IMOperation getOperation() {
       File resOutputDir = new File(super.outputDir, RES_DIR_NAME)

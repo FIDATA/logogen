@@ -25,8 +25,11 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.internal.plugins.DslObject
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.base.plugins.LifecycleBasePlugin
+
+import java.security.cert.Extension
 
 /**
  * org.fidata.logogen Gradle Project plugin
@@ -60,6 +63,10 @@ final class LogoGenPlugin implements Plugin<Project> {
     }
 
     basePlugin.generators.configureEach { LogoGeneratorDescriptor descriptor ->
+      if (descriptor.extensionClass != null) {
+        ((ExtensionAware)extension).extensions.create(descriptor.name, descriptor.extensionClass)
+      }
+
       TaskProvider<LogoGenerator> logoGeneratorProvider = project.tasks.register(descriptor.name, descriptor.implementationClass) { LogoGenerator logoGenerator ->
         logoGenerator.group = LifecycleBasePlugin.BUILD_GROUP
         logoGenerator.srcFile.set extension.srcFile

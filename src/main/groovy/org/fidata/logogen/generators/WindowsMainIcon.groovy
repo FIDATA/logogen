@@ -25,9 +25,9 @@ import org.fidata.imagemagick.Units
 import org.fidata.logogen.LogoGenExtension
 import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.ConfigureUtil
@@ -85,11 +85,11 @@ final class WindowsMainIcon extends LogoGenerator {
 
   @Input
   final MapProperty<Integer, WindowsMainIconExtension.ColorDepth> depths = project.objects.mapProperty(Integer, WindowsMainIconExtension.ColorDepth).convention(
-    ((ExtensionAware)project.extensions.findByType(LogoGenExtension))?.extensions?.getByType(WindowsMainIconExtension)?.depths
+    ((ExtensionAware)project.extensions.findByType(LogoGenExtension))?.extensions?.getByType(WindowsMainIconExtension)?.depths // TODO ?
   )
 
   @Input
-  final ListProperty<Integer> sizes = project.objects.listProperty(Integer).empty()
+  final SetProperty<Integer> sizes = project.objects.setProperty(Integer).empty()
 
   void depth(int depth, @DelegatesTo(WindowsMainIconExtension.ColorDepth) Closure configureClosure) {
     depths.put depth, project.providers.provider {

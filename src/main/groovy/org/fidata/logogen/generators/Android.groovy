@@ -19,9 +19,12 @@
  */
 package org.fidata.logogen.generators
 
-import com.google.common.collect.ImmutableMap
+import static org.fidata.android.AndroidUtils.*
+import org.fidata.android.DensityFactor
+import org.fidata.logogen.LogoGenExtension
+import org.gradle.api.plugins.ExtensionAware
+import org.gradle.api.provider.SetProperty
 import groovy.transform.CompileStatic
-import groovy.transform.InheritConstructors
 import org.fidata.imagemagick.Units
 import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.api.tasks.TaskAction
@@ -62,19 +65,19 @@ import java.math.MathContext
  */
 @CompileStatic
 final class Android extends LogoGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android', Android, null)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android', Android, AndroidExtension)
 
-  @InheritConstructors
-  protected static class ImageMagickConvertOperation extends AndroidPre30.ImageMagickConvertOperation {
-    private static final Map<String, BigDecimal> DENSITY_FACTORS = ImmutableMap.copyOf(
-      super.DENSITY_FACTORS + [
-        'tvdpi':   1.33, // Added in API 13
-        'xxhdpi':  3.0,  // Added in API 16
-        'xxxhdpi': 4.0,  // Added in API 18
-      ]
-    )
+  final SetProperty<DensityFactor> densityFactors = project.objects.setProperty(DensityFactor).convention(
+    ((ExtensionAware)project.extensions.findByType(LogoGenExtension))?.extensions?.getByType(AndroidExtension)?.densityFactors // TODO ?
+  )
 
-    public static final String RES_DIR_NAME = 'res'
+  protected final static class ImageMagickConvertOperation extends AndroidPre30.ImageMagickConvertOperation /* TODO */ {
+    private final AndroidConfiguration configuration
+
+    ImageMagickConvertOperation(File srcFile, boolean debug = false, File outputDir, AndroidConfiguration configuration) {
+      super(srcFile, debug, outputDir)
+      this.@configuration = configuration
+    }
 
     @Override
     protected IMOperation getOperation() {
@@ -83,16 +86,16 @@ final class Android extends LogoGenerator {
       IMOperation operation = new IMOperation()
       operation.background('none')
 
-      DENSITY_FACTORS.each { String densityName, BigDecimal densityValue ->
-        File densityOutputDir = new File(resOutputDir, "mipmap-${densityName}")
+      configuration.densityFactors.each { DensityFactor densityFactor ->
+        File densityOutputDir = new File(resOutputDir, "mipmap-$densityFactor.name")
         assert densityOutputDir.mkdirs()
         String outputFile = new File(densityOutputDir, 'ic_launcher.png').toString()
 
-        int size = (densityValue * SIZE_DP).round(MathContext.UNLIMITED).intValueExact()
+        int size = (densityFactor.factor * SIZE_DP).round(MathContext.UNLIMITED).intValueExact()
         operation.openOperation()
           .clone(0)
           .units(Units.PIXELSPERINCH.toString())
-          .density((densityValue * DEF_DENSITY).round(MathContext.UNLIMITED).intValueExact())
+          .density((densityFactor.factor * DEF_DENSITY).round(MathContext.UNLIMITED).intValueExact())
           .resize(size, size)
           .write(outputFile)
           .delete()
@@ -112,6 +115,6 @@ final class Android extends LogoGenerator {
 
   @TaskAction
   protected void resizeAndConvert() {
-    imageMagicConvert workerExecutor, ImageMagickConvertOperation
+    imageMagicConvert workerExecutor, ImageMagickConvertOperation, new AndroidConfiguration(densityFactors.get())
   }
 }

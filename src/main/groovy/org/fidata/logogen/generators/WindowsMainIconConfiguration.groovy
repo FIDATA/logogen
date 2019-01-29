@@ -7,12 +7,12 @@ import org.fidata.imagemagick.quantization.color.ColorReduction
 
 @Immutable
 @CompileStatic
-final class WindowsMainIconConfiguration {
+final class WindowsMainIconConfiguration implements Serializable {
   final Map<Integer, ColorDepth> depths
 
   @Immutable
   final static class ColorDepth {
-    final List<Integer> sizes
+    final Set<Integer> sizes
     final ColorReduction colorReduction
   }
 
