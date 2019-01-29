@@ -19,15 +19,18 @@
  */
 package org.fidata.logogen.generators
 
-import com.google.common.collect.ImmutableList
 import groovy.transform.CompileStatic
+import org.fidata.imagemagick.Compress
 import org.fidata.imagemagick.Units
-import org.fidata.imagemagick.quantization.color.ColorReduction
-import org.fidata.imagemagick.quantization.color.UniformColors
+import org.fidata.logogen.LogoGenExtension
 import org.fidata.logogen.LogoGeneratorDescriptor
+import org.gradle.api.plugins.ExtensionAware
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Nested
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
+import org.gradle.util.ConfigureUtil
 import org.gradle.workers.WorkerExecutor
 import org.im4java.core.IMOperation
 import javax.inject.Inject
@@ -80,25 +83,34 @@ import javax.inject.Inject
 final class WindowsMainIcon extends LogoGenerator {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsMainIcon', WindowsMainIcon, WindowsMainIconExtension)
 
-  @Nested
-  // These settings may be not the best for some logos.
-  // TODOC
-  public final Property<ColorReduction> colorDepth4Reduction = project.objects.property(ColorReduction).convention(new UniformColors(3))
-  @Nested
-  public final Property<ColorReduction> colorDepth8Reduction = project.objects.property(ColorReduction)
+  @Input
+  final MapProperty<Integer, WindowsMainIconExtension.ColorDepth> depths = project.objects.mapProperty(Integer, WindowsMainIconExtension.ColorDepth).convention(
+    ((ExtensionAware)project.extensions.findByType(LogoGenExtension))?.extensions?.getByType(WindowsMainIconExtension)?.depths
+  )
+
+  @Input
+  final ListProperty<Integer> sizes = project.objects.listProperty(Integer).empty()
+
+  void depth(int depth, @DelegatesTo(WindowsMainIconExtension.ColorDepth) Closure configureClosure) {
+    depths.put depth, project.providers.provider {
+      WindowsMainIconExtension.ColorDepth colorDepth = new WindowsMainIconExtension.ColorDepth(project.objects, sizes)
+      ConfigureUtil.configure configureClosure, colorDepth
+    }
+  }
+
+  @Input
+  final Property<Compress> compress = project.objects.property(Compress).convention(
+    ((ExtensionAware)project.extensions.findByType(LogoGenExtension))?.extensions?.getByType(WindowsMainIconExtension)?.compress
+  )
 
   protected final static class ImageMagickConvertOperation extends LogoGenerator.ImageMagickConvertOperation {
-    private static final List<Integer> SIZES = ImmutableList.copyOf([256, 96, 72, 64, 60, 48, 40, 32, 24, 20, 16])
-
     public static final String MAINICON_ICO_FILE_NAME = 'MAINICON.ico'
 
-    private final ColorReduction colorDepth4Reduction
-    private final ColorReduction colorDepth8Reduction
+    private final WindowsMainIconConfiguration configuration
 
-    ImageMagickConvertOperation(File srcFile, boolean debug, File outputDir, ColorReduction colorDepth4Reduction, ColorReduction colorDepth8Reduction) {
+    ImageMagickConvertOperation(File srcFile, boolean debug, File outputDir, WindowsMainIconConfiguration configuration) {
       super(srcFile, debug, outputDir)
-      this.@colorDepth4Reduction = colorDepth4Reduction
-      this.@colorDepth8Reduction = colorDepth8Reduction
+      this.@configuration = configuration
     }
 
     @Override
@@ -110,36 +122,28 @@ final class WindowsMainIcon extends LogoGenerator {
 
       File outputFile = new File(super.outputDir, MAINICON_ICO_FILE_NAME)
 
-      Map<Integer, IMOperation> colorDepthReductionOperations = [
-        4: colorDepth4Reduction.toIMOperation(),
-        8: colorDepth8Reduction.toIMOperation(),
-      ]
-
-      colorDepthReductionOperations.each { Integer colorDepth, IMOperation colorReductionOperation ->
-        for (Integer size in SIZES) {
+      configuration.depths.each { Integer depth, WindowsMainIconConfiguration.ColorDepth colorDepth ->
+        IMOperation colorReductionOperation = colorDepth.colorReduction?.toIMOperation()
+        for (Integer size in colorDepth.sizes) {
           operation.openOperation()
             .clone(0)
           if (colorReductionOperation != null) {
             operation.addOperation(colorReductionOperation)
           }
-          operation
-            .colors(2 ** colorDepth)
-            .resize(size, size)
-            .depth(4)
+          if (depth != null) { // TODO
+            operation.colors(2**depth)
+          }
+          operation.resize(size, size)
+          if (depth != null) { // TODO
+            operation.depth(depth)
+          }
           operation.closeOperation()
         }
       }
 
-      for (Integer size in SIZES) {
-        operation.openOperation()
-          .clone(0)
-          .resize(size, size)
-        operation.closeOperation()
-      }
-
       operation
         .delete(0)
-        .compress('None')
+        .compress(configuration.compress.toString())
         .write(outputFile.toString())
 
       operation
@@ -155,8 +159,11 @@ final class WindowsMainIcon extends LogoGenerator {
 
   @TaskAction
   protected void resizeAndConvert() {
-    imageMagicConvert workerExecutor, ImageMagickConvertOperation, colorDepth4Reduction.orNull, colorDepth8Reduction.orNull
-
-    project.provid
+    imageMagicConvert workerExecutor, ImageMagickConvertOperation, new WindowsMainIconConfiguration(
+      /*(Map<Integer, WindowsMainIconConfiguration.ColorDepth>)*/depths.get().collectEntries { Integer depth, WindowsMainIconExtension.ColorDepth colorDepth ->
+        [(depth): new WindowsMainIconConfiguration.ColorDepth(colorDepth.sizes.get(), colorDepth.reduction.getOrNull())]
+      },
+      compress.get()
+    )
   }
 }
