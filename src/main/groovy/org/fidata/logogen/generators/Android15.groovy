@@ -69,7 +69,7 @@ final class Android15 extends LogoGenerator {
     protected IMOperation getOperation() {
       File drawableOutputDir = super.outputDir.toPath().resolve(RES_DIR_NAME).resolve('drawable').toFile()
       assert drawableOutputDir.mkdirs()
-      String outputFile = new File(drawableOutputDir, IC_LAUNCHER_FILE_NAME).toString()
+      File outputFile = new File(drawableOutputDir, IC_LAUNCHER_FILE_NAME)
 
       int size = SIZE_DP.intValueExact()
 
@@ -80,7 +80,7 @@ final class Android15 extends LogoGenerator {
         .units(Units.PIXELSPERINCH.toString())
         .density(DEF_DENSITY.intValueExact())
         .resize(size, size)
-        .write(outputFile)
+        .write(outputFile.toString())
       operation
     }
   }

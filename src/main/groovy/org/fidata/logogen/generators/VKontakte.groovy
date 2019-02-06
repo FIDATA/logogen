@@ -35,7 +35,7 @@ import javax.inject.Inject
  * 2. https://vk.com/page-11770709_44565679
  */
 @CompileStatic
-final class VKontakte extends LogoResizeAndConvertGenerator {
+final class VKontakte extends SimpleLogoGenerator {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('vkontakte', VKontakte, null)
 
   @Inject

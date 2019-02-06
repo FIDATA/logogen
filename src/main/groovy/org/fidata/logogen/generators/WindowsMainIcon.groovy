@@ -22,7 +22,7 @@ package org.fidata.logogen.generators
 import groovy.transform.CompileStatic
 import org.fidata.imagemagick.Compress
 import org.fidata.imagemagick.Units
-import org.fidata.logogen.LogoGenExtension
+import org.fidata.logogen.LogoGeneratorsExtension
 import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.MapProperty
@@ -83,9 +83,13 @@ import javax.inject.Inject
 final class WindowsMainIcon extends LogoGenerator {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsMainIcon', WindowsMainIcon, WindowsMainIconExtension)
 
+  private WindowsMainIconExtension getProjectExtension() {
+    ((ExtensionAware)project.extensions.findByType(LogoGeneratorsExtension)).extensions.getByType(DESCRIPTOR.extensionClass)
+  }
+
   @Input
   final MapProperty<Integer, WindowsMainIconExtension.ColorDepth> depths = project.objects.mapProperty(Integer, WindowsMainIconExtension.ColorDepth).convention(
-    ((ExtensionAware)project.extensions.findByType(LogoGenExtension))?.extensions?.getByType(WindowsMainIconExtension)?.depths // TODO ?
+    projectExtension.depths
   )
 
   @Input
@@ -100,7 +104,7 @@ final class WindowsMainIcon extends LogoGenerator {
 
   @Input
   final Property<Compress> compress = project.objects.property(Compress).convention(
-    ((ExtensionAware)project.extensions.findByType(LogoGenExtension))?.extensions?.getByType(WindowsMainIconExtension)?.compress
+    projectExtension.compress
   )
 
   protected final static class ImageMagickConvertOperation extends LogoGenerator.ImageMagickConvertOperation {

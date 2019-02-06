@@ -19,9 +19,13 @@
  */
 package org.fidata.logogen.generators
 
+import org.fidata.logogen.LogoGeneratorsExtension
+
 import static org.fidata.android.AndroidUtils.*
+import org.fidata.android.DensityFactor
+import org.gradle.api.plugins.ExtensionAware
+import org.gradle.api.provider.SetProperty
 import groovy.transform.CompileStatic
-import groovy.transform.InheritConstructors
 import org.fidata.imagemagick.Units
 import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.api.tasks.TaskAction
@@ -56,11 +60,25 @@ import java.math.MathContext
  *    https://android-developers.googleblog.com/2013/07/making-beautiful-android-app-icons.html
  */
 @CompileStatic
-final class AndroidPre30 extends LogoGenerator {
+final class AndroidPre30 extends LogoGenerator /* TODO: LogoGeneratorWithRtlAndHebrew*/ {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('androidPre3.0', AndroidPre30, AndroidPre30Extension)
 
-  @InheritConstructors
+  private AndroidPre30Extension getProjectExtension() {
+    ((ExtensionAware)project.extensions.findByType(LogoGeneratorsExtension)).extensions.getByType(DESCRIPTOR.extensionClass)
+  }
+
+  final SetProperty<DensityFactor> densityFactors = project.objects.setProperty(DensityFactor).convention(
+    projectExtension.densityFactors
+  )
+
   protected static class ImageMagickConvertOperation extends Android15.ImageMagickConvertOperation {
+    private final AndroidConfiguration configuration
+
+    ImageMagickConvertOperation(File srcFile, boolean debug = false, File outputDir, AndroidConfiguration configuration) {
+      super(srcFile, debug, outputDir)
+      this.@configuration = configuration
+    }
+
     @Override
     protected IMOperation getOperation() {
       File resOutputDir = new File(super.outputDir, RES_DIR_NAME)
@@ -68,19 +86,19 @@ final class AndroidPre30 extends LogoGenerator {
       IMOperation operation = new IMOperation()
       operation.background('none')
 
-      DENSITY_FACTORS.each { String densityName, BigDecimal densityValue ->
-        File densityOutputDir = new File(resOutputDir, "drawable-${densityName}")
+      configuration.densityFactors.each { DensityFactor densityFactor ->
+        File densityOutputDir = new File(resOutputDir, "drawable-${densityFactor.name}")
         assert densityOutputDir.mkdirs()
-        String outputFile = new File(densityOutputDir, 'ic_launcher.png').toString()
+        File outputFile = new File(densityOutputDir, 'ic_launcher.png')
 
-        int size = (densityValue * SIZE_DP).round(MathContext.UNLIMITED).intValueExact()
+        int size = (densityFactor.factor * SIZE_DP).round(MathContext.UNLIMITED).intValueExact()
 
         operation.openOperation()
           .clone(0)
           .units(Units.PIXELSPERINCH.toString())
-          .density((densityValue * DEF_DENSITY).round(MathContext.UNLIMITED).intValueExact())
+          .density((densityFactor.factor * DEF_DENSITY).round(MathContext.UNLIMITED).intValueExact())
           .resize(size, size)
-          .write(outputFile)
+          .write(outputFile.toString())
           .delete()
         operation.closeOperation()
       }
@@ -98,6 +116,6 @@ final class AndroidPre30 extends LogoGenerator {
 
   @TaskAction
   protected void resizeAndConvert() {
-    imageMagicConvert workerExecutor, ImageMagickConvertOperation
+    imageMagicConvert workerExecutor, ImageMagickConvertOperation, new AndroidConfiguration(densityFactors.get())
   }
 }

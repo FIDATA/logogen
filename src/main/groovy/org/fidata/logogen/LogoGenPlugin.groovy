@@ -21,11 +21,12 @@ package org.fidata.logogen
 
 import groovy.transform.CompileStatic
 import org.fidata.logogen.generators.LogoGenerator
+import org.fidata.logogen.generators.LogoGeneratorWithRtl
+import org.fidata.logogen.generators.LogoGeneratorWithRtlAndHebrew
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.internal.plugins.DslObject
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 
@@ -63,14 +64,32 @@ final class LogoGenPlugin implements Plugin<Project> {
     }
 
     basePlugin.generators.configureEach { LogoGeneratorDescriptor descriptor ->
-      if (descriptor.extensionClass != null) {
-        ((ExtensionAware)extension).extensions.create(descriptor.name, descriptor.extensionClass)
-      }
-
       TaskProvider<LogoGenerator> logoGeneratorProvider = project.tasks.register(descriptor.name, descriptor.implementationClass) { LogoGenerator logoGenerator ->
         logoGenerator.group = LifecycleBasePlugin.BUILD_GROUP
-        logoGenerator.srcFile.set extension.srcFile
+        logoGenerator.srcFile.convention extension.srcFile
         logoGenerator.outputDir.set project.layout.buildDirectory.dir(descriptor.name)
+        if (LogoGeneratorWithRtl.isInstance(logoGenerator)) {
+          LogoGeneratorWithRtl logoGeneratorWithRtl = (LogoGeneratorWithRtl)logoGenerator
+          logoGeneratorWithRtl.rtlSrcFile.convention extension.rtlSrcFile
+          logoGeneratorWithRtl.rtlIconGenerationMethod.convention project.providers.provider {
+            logoGeneratorWithRtl.rtlSrcFile.present
+              ? RtlIconGenerationMethod.SEPARATE_SOURCE
+              : extension.rtlIconGenerationMethod.get() != RtlIconGenerationMethod.SEPARATE_SOURCE
+                ? extension.rtlIconGenerationMethod.get()
+                : RtlIconGenerationMethod.MIRROW
+          }
+          if (LogoGeneratorWithRtlAndHebrew.isInstance(logoGeneratorWithRtl)) {
+            LogoGeneratorWithRtlAndHebrew logoGeneratorWithRtlAndHebrew = (LogoGeneratorWithRtlAndHebrew)logoGeneratorWithRtl
+            logoGeneratorWithRtlAndHebrew.hebrewSrcFile.convention extension.hebrewSrcFile
+            logoGeneratorWithRtlAndHebrew.hebrewIconGenerationMethod.convention project.providers.provider {
+              logoGeneratorWithRtlAndHebrew.hebrewSrcFile.present
+                ? HebrewIconGenerationMethod.SEPARATE_SOURCE
+                : extension.hebrewIconGenerationMethod.get() != HebrewIconGenerationMethod.SEPARATE_SOURCE
+                  ? extension.hebrewIconGenerationMethod.get()
+                  : HebrewIconGenerationMethod.STANDARD_RTL
+            }
+          }
+        }
       }
       rootTaskProvider.configure { Task rootTask ->
         rootTask.dependsOn logoGeneratorProvider

@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 /*
- * Twitter Profile Photo Generator
- * Copyright © 2015, 2018-2019  Basil Peace
+ * LogoGeneratorsExtension class
+ * Copyright © 2019  Basil Peace
  *
  * This file is part of Logo Generator.
  *
@@ -17,27 +17,13 @@
  * implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package org.fidata.logogen.generators
-
-import groovy.transform.CompileStatic
-import org.fidata.logogen.LogoGeneratorDescriptor
-import org.gradle.workers.WorkerExecutor
-import javax.inject.Inject
+package org.fidata.logogen
+import org.gradle.api.Project
 
 /**
- * Twitter Profile Photo
- *
- * File format: JPG/GIF/PNG
- * Size: 400
- *
- * References:
+ * logoGenerators extension for {@link Project}.
+ * Stores configuration of specific generators.
+ * Added by {@code logogen-base} plugin
  */
-@CompileStatic
-final class Twitter extends SimpleLogoGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('twitter', Twitter, null)
-
-  @Inject
-  Twitter(WorkerExecutor workerExecutor) {
-    super(workerExecutor, 400, 'png')
-  }
+final class LogoGeneratorsExtension {
 }

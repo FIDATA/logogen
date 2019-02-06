@@ -26,12 +26,18 @@ import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.NamedDomainObjectFactory
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
 
 /**
  * org.fidata.logogen-base Gradle Project plugin
  */
 @CompileStatic
 final class LogoGenBasePlugin implements Plugin<Project> {
+  /**
+   * Name of logoGenerators extension for {@link Project}
+   */
+  public static final String EXTENSION_NAME = 'logoGenerators'
+
   private NamedDomainObjectContainer<LogoGeneratorDescriptor> generators
 
   /**
@@ -83,9 +89,17 @@ final class LogoGenBasePlugin implements Plugin<Project> {
    */
   @Override
   void apply(Project project) {
+    LogoGeneratorsExtension extension = project.extensions.create(EXTENSION_NAME, LogoGeneratorsExtension)
+
     this.@generators = project.container(LogoGeneratorDescriptor, (NamedDomainObjectFactory)null)
 
+    project.extensions.extraProperties[RtlIconGenerationMethod.simpleName] = RtlIconGenerationMethod
+
     generators.configureEach { LogoGeneratorDescriptor descriptor ->
+      if (descriptor.extensionClass != null) {
+        ((ExtensionAware)extension).extensions.create(descriptor.name, descriptor.extensionClass)
+      }
+
       Class<? extends LogoGenerator> logoGeneratorClass = descriptor.implementationClass
       project.extensions.extraProperties[logoGeneratorClass.simpleName] = logoGeneratorClass
     }

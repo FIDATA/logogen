@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 /*
- * LogoResizeAndConvertGenerator Gradle task class
+ * SimpleLogoGenerator Gradle task class
  * Copyright © 2015, 2018-2019  Basil Peace
  *
  * This file is part of Logo Generator.
@@ -27,7 +27,7 @@ import org.im4java.core.IMOperation
 import javax.inject.Inject
 
 @CompileStatic
-abstract class LogoResizeAndConvertGenerator extends LogoGenerator {
+abstract class SimpleLogoGenerator extends LogoGenerator {
   private final WorkerExecutor workerExecutor
   private final int size
   private final String format
@@ -35,15 +35,15 @@ abstract class LogoResizeAndConvertGenerator extends LogoGenerator {
 
   final protected static class ImageMagickResizeAndConvertOperation extends LogoGenerator.ImageMagickConvertOperation {
     private final int size
-    private final String format
     private final Integer density
+    private final File outputFile
 
     @Inject
-    ImageMagickResizeAndConvertOperation(File srcFile, boolean debug, int size, String format, Integer density) {
-      super(srcFile, debug)
+    ImageMagickResizeAndConvertOperation(File srcFile, boolean debug, File outputDir, int size, Integer density, String outputFileName) {
+      super(srcFile, debug, outputDir)
       this.@size = size
-      this.@format = format
       this.@density = density
+      this.@outputFile = new File(super.outputDir, outputFileName)
     }
 
     @Override
@@ -57,12 +57,12 @@ abstract class LogoResizeAndConvertGenerator extends LogoGenerator {
       }
       operation
         .resize(size, size)
-        .addImage(outputFile) // TODO
+        .write(outputFile.toString())
       operation
     }
   }
 
-  LogoResizeAndConvertGenerator(WorkerExecutor workerExecutor, int size, String format, Integer density = null) {
+  SimpleLogoGenerator(WorkerExecutor workerExecutor, int size, String format, Integer density = null) {
     this.@workerExecutor = workerExecutor
     this.@size = size
     this.@format = format
@@ -71,6 +71,6 @@ abstract class LogoResizeAndConvertGenerator extends LogoGenerator {
 
   @TaskAction
   protected final void resizeAndConvert() {
-    imageMagicConvert(workerExecutor, ImageMagickResizeAndConvertOperation, size, format, density)
+    imageMagicConvert workerExecutor, ImageMagickResizeAndConvertOperation, size, density, "${ project.group }.$format".toString()
   }
 }

@@ -37,7 +37,7 @@ import javax.inject.Inject
  * https://support.google.com/googleplay/android-developer/answer/1078870
  */
 @CompileStatic
-final class GooglePlay extends LogoResizeAndConvertGenerator {
+final class GooglePlay extends SimpleLogoGenerator {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('googlePlay', GooglePlay, null)
 
   @Inject

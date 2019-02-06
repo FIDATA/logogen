@@ -19,9 +19,10 @@
  */
 package org.fidata.logogen.generators
 
+import org.fidata.logogen.LogoGeneratorsExtension
+
 import static org.fidata.android.AndroidUtils.*
 import org.fidata.android.DensityFactor
-import org.fidata.logogen.LogoGenExtension
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.SetProperty
 import groovy.transform.CompileStatic
@@ -64,11 +65,15 @@ import java.math.MathContext
  *    https://developer.android.com/guide/practices/ui_guidelines/icon_design_adaptive
  */
 @CompileStatic
-final class Android extends LogoGenerator {
+final class Android extends LogoGeneratorWithRtlAndHebrew {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android', Android, AndroidExtension)
 
+  private AndroidExtension getProjectExtension() {
+    ((ExtensionAware)project.extensions.findByType(LogoGeneratorsExtension)).extensions.getByType(DESCRIPTOR.extensionClass)
+  }
+
   final SetProperty<DensityFactor> densityFactors = project.objects.setProperty(DensityFactor).convention(
-    ((ExtensionAware)project.extensions.findByType(LogoGenExtension))?.extensions?.getByType(AndroidExtension)?.densityFactors // TODO ?
+    projectExtension.densityFactors
   )
 
   protected final static class ImageMagickConvertOperation extends AndroidPre30.ImageMagickConvertOperation /* TODO */ {
@@ -89,15 +94,16 @@ final class Android extends LogoGenerator {
       configuration.densityFactors.each { DensityFactor densityFactor ->
         File densityOutputDir = new File(resOutputDir, "mipmap-$densityFactor.name")
         assert densityOutputDir.mkdirs()
-        String outputFile = new File(densityOutputDir, 'ic_launcher.png').toString()
+        File outputFile = new File(densityOutputDir, 'ic_launcher.png')
 
         int size = (densityFactor.factor * SIZE_DP).round(MathContext.UNLIMITED).intValueExact()
+
         operation.openOperation()
           .clone(0)
           .units(Units.PIXELSPERINCH.toString())
           .density((densityFactor.factor * DEF_DENSITY).round(MathContext.UNLIMITED).intValueExact())
           .resize(size, size)
-          .write(outputFile)
+          .write(outputFile.toString())
           .delete()
         operation.closeOperation()
       }

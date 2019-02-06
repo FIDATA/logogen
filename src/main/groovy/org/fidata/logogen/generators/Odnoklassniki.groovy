@@ -33,7 +33,7 @@ import javax.inject.Inject
  * References:
  */
 @CompileStatic
-final class Odnoklassniki extends LogoResizeAndConvertGenerator {
+final class Odnoklassniki extends SimpleLogoGenerator {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('odnoklassniki', Odnoklassniki, null)
 
   @Inject

@@ -33,7 +33,7 @@ import javax.inject.Inject
  * References:
  */
 @CompileStatic
-final class Facebook extends LogoResizeAndConvertGenerator {
+final class Facebook extends SimpleLogoGenerator {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('facebook', Facebook, null)
 
   @Inject

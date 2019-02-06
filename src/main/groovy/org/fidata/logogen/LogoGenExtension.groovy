@@ -19,9 +19,12 @@
  */
 package org.fidata.logogen
 
+
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.ProviderFactory
+
 import javax.inject.Inject
 import java.awt.Color
 import org.gradle.api.Project
@@ -29,17 +32,43 @@ import org.gradle.api.Project
 /**
  * logogen extension for {@link Project}
  */
-class LogoGenExtension {
+final class LogoGenExtension {
   /**
    * Logo source, in SVG format
    */
   final RegularFileProperty srcFile
 
   /**
+   * Logo source for RTL locales, in SVG format
+   */
+  final RegularFileProperty rtlSrcFile
+
+  /**
+   * Logo source for Hebrew locale, in SVG format
+   */
+  final RegularFileProperty hebrewSrcFile
+
+  /**
    * Background color.
    * It is used by generators that require opaque background
    */
   final Property<Color> background
+
+  /**
+   * Method of creation of RTL icon.
+   * By default it is {@link RtlIconGenerationMethod#SEPARATE_SOURCE}
+   * if {@link #rtlSrcFile} is set
+   * and {@link RtlIconGenerationMethod#MIRROW} otherwise
+   */
+  final Property<RtlIconGenerationMethod> rtlIconGenerationMethod
+
+  /**
+   * Method of creation of Hebrew icon.
+   * By default it is {@link HebrewIconGenerationMethod#SEPARATE_SOURCE}
+   * if {@link #hebrewSrcFile} is set
+   * and {@link HebrewIconGenerationMethod#STANDARD_RTL} otherwise
+   */
+  final Property<HebrewIconGenerationMethod> hebrewIconGenerationMethod
 
   /**
    * Sets background color by name.
@@ -55,11 +84,20 @@ class LogoGenExtension {
   /**
    * Construct new LogoGenExtension object
    *
+   * @param providerFactory {@link ProviderFactory} instance
    * @param objectFactory {@link ObjectFactory} instance
    */
   @Inject
-  protected LogoGenExtension(ObjectFactory objectFactory) {
+  protected LogoGenExtension(ProviderFactory providerFactory, ObjectFactory objectFactory) {
     srcFile = objectFactory.fileProperty()
+    rtlSrcFile = objectFactory.fileProperty()
+    hebrewSrcFile = objectFactory.fileProperty()
     background = objectFactory.property(Color)
+    rtlIconGenerationMethod = objectFactory.property(RtlIconGenerationMethod).convention providerFactory.provider {
+      rtlSrcFile.present ? RtlIconGenerationMethod.SEPARATE_SOURCE : RtlIconGenerationMethod.MIRROW
+    }
+    hebrewIconGenerationMethod = objectFactory.property(HebrewIconGenerationMethod).convention providerFactory.provider {
+      hebrewSrcFile.present ? HebrewIconGenerationMethod.SEPARATE_SOURCE : HebrewIconGenerationMethod.STANDARD_RTL
+    }
   }
 }

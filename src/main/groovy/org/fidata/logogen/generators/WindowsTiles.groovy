@@ -20,6 +20,7 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.fidata.imagemagick.Units
 import org.fidata.logogen.LogoGeneratorDescriptor
 import org.gradle.api.Action
 import org.gradle.api.tasks.TaskAction
@@ -74,7 +75,7 @@ final class WindowsTiles extends LogoGenerator {
         operation.units(Units.PIXELSPERINCH.toString())
         operation.density((densityValue * DEF_DENSITY).round(MathContext.UNLIMITED).intValueExact())
         operation.resize(size, size)
-        operation.addImage(outputFile)
+        operation.write(outputFile)
         operation.closeOperation()
       }
 
