@@ -20,7 +20,13 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
+import org.fidata.imagemagick.Units
 import org.fidata.logogen.LogoGeneratorDescriptor
+import org.gradle.api.tasks.TaskAction
+import org.gradle.workers.WorkerExecutor
+import org.im4java.core.IMOperation
+
+import javax.inject.Inject
 
 /*
    Free Desktop
@@ -53,7 +59,7 @@ import org.fidata.logogen.LogoGeneratorDescriptor
       http://tango.freedesktop.org/Tango_Icon_Theme_Guidelines
 */
 @CompileStatic
-LogoGenerator('FreeDesktop') { srcFile, includeDir, outputDir, debug ->
+final class FreeDesktop extends LogoGenerator /* TODO: WithRtl? */ {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('freeDesktop', FreeDesktop, null)
 
   outputDir = "$outputDir/hicolor"
@@ -91,4 +97,63 @@ LogoGenerator('FreeDesktop') { srcFile, includeDir, outputDir, debug ->
   commands.push([type: CrossPlatformExec, commandLine: args, outputFiles: [outputFile]])
 
   return commands
+
+  protected final static class ImageMagickConvertOperation extends LogoGenerator.ImageMagickConvertOperation {
+    public static final String MAINICON_ICO_FILE_NAME = 'MAINICON.ico'
+
+    private final WindowsMainIconConfiguration configuration
+
+    ImageMagickConvertOperation(File srcFile, boolean debug, File outputDir, WindowsMainIconConfiguration configuration) {
+      super(srcFile, debug, outputDir)
+      this.@configuration = configuration
+    }
+
+    @Override
+    protected IMOperation getOperation() {
+      IMOperation operation = new IMOperation()
+      operation
+        .background('none')
+        .units(Units.PIXELSPERINCH.toString())
+
+      File outputFile = new File(super.outputDir, MAINICON_ICO_FILE_NAME)
+
+      configuration.depths.each { Integer depth, WindowsMainIconConfiguration.ColorDepth colorDepth ->
+        IMOperation colorReductionOperation = colorDepth.colorReduction?.toIMOperation()
+        for (Integer size in colorDepth.sizes) {
+          operation.openOperation()
+            .clone(0)
+          if (colorReductionOperation != null) {
+            operation.addOperation(colorReductionOperation)
+          }
+          if (depth != null) { // TODO
+            operation.colors(2**depth)
+          }
+          operation.resize(size, size)
+          if (depth != null) { // TODO
+            operation.depth(depth)
+          }
+          operation.closeOperation()
+        }
+      }
+
+      operation
+        .delete(0)
+        .compress(configuration.compress.toString())
+        .write(outputFile.toString())
+
+      operation
+    }
+  }
+
+  private final WorkerExecutor workerExecutor
+
+  @Inject
+  FreeDesktop(WorkerExecutor workerExecutor) {
+    this.@workerExecutor = workerExecutor
+  }
+
+  @TaskAction
+  protected void resizeAndConvert() {
+    imageMagicConvert workerExecutor, ImageMagickConvertOperation
+  }
 }
