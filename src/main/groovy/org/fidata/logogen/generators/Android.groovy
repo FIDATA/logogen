@@ -65,16 +65,12 @@ import java.math.MathContext
  *    https://developer.android.com/guide/practices/ui_guidelines/icon_design_adaptive
  */
 @CompileStatic
-final class Android extends LogoGeneratorWithRtlAndHebrew {
+final class Android extends LogoGeneratorWithRtlAndHebrew implements AndroidTrait {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android', Android, AndroidExtension)
 
   private AndroidExtension getProjectExtension() {
     ((ExtensionAware)project.extensions.findByType(LogoGeneratorsExtension)).extensions.getByType(DESCRIPTOR.extensionClass)
   }
-
-  final SetProperty<DensityFactor> densityFactors = project.objects.setProperty(DensityFactor).convention(
-    projectExtension.densityFactors
-  )
 
   protected final static class ImageMagickConvertOperation extends AndroidPre30.ImageMagickConvertOperation /* TODO */ {
     private final AndroidConfiguration configuration
@@ -117,6 +113,9 @@ final class Android extends LogoGeneratorWithRtlAndHebrew {
   @Inject
   Android(WorkerExecutor workerExecutor) {
     this.@workerExecutor = workerExecutor
+    this.@org_fidata_logogen_generators_AndroidTrait__densityFactors = project.objects.setProperty(DensityFactor).convention(
+      projectExtension.densityFactors
+    )
   }
 
   @TaskAction

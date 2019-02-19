@@ -24,7 +24,6 @@ import org.fidata.logogen.LogoGeneratorsExtension
 import static org.fidata.android.AndroidUtils.*
 import org.fidata.android.DensityFactor
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.api.provider.SetProperty
 import groovy.transform.CompileStatic
 import org.fidata.imagemagick.Units
 import org.fidata.logogen.LogoGeneratorDescriptor
@@ -60,16 +59,12 @@ import java.math.MathContext
  *    https://android-developers.googleblog.com/2013/07/making-beautiful-android-app-icons.html
  */
 @CompileStatic
-final class AndroidPre30 extends LogoGenerator /* TODO: LogoGeneratorWithRtlAndHebrew*/ {
+final class AndroidPre30 extends LogoGenerator /* TODO: LogoGeneratorWithRtlAndHebrew*/ implements AndroidTrait {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('androidPre3.0', AndroidPre30, AndroidPre30Extension)
 
   private AndroidPre30Extension getProjectExtension() {
     ((ExtensionAware)project.extensions.findByType(LogoGeneratorsExtension)).extensions.getByType(DESCRIPTOR.extensionClass)
   }
-
-  final SetProperty<DensityFactor> densityFactors = project.objects.setProperty(DensityFactor).convention(
-    projectExtension.densityFactors
-  )
 
   protected static class ImageMagickConvertOperation extends Android15.ImageMagickConvertOperation {
     private final AndroidConfiguration configuration
@@ -112,6 +107,9 @@ final class AndroidPre30 extends LogoGenerator /* TODO: LogoGeneratorWithRtlAndH
   @Inject
   AndroidPre30(WorkerExecutor workerExecutor) {
     this.@workerExecutor = workerExecutor
+    this.@org_fidata_logogen_generators_AndroidTrait__densityFactors = project.objects.setProperty(DensityFactor).convention(
+      projectExtension.densityFactors
+    )
   }
 
   @TaskAction

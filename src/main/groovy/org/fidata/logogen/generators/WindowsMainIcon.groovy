@@ -80,32 +80,12 @@ import javax.inject.Inject
  *    a note in the end of this article: https://www.creativefreedom.co.uk/icon-designers-blog/windows-7-icon-sizes/
  */
 @CompileStatic
-final class WindowsMainIcon extends LogoGenerator {
+final class WindowsMainIcon extends LogoGenerator implements WindowsMainIconTrait {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsMainIcon', WindowsMainIcon, WindowsMainIconExtension)
 
   private WindowsMainIconExtension getProjectExtension() {
     ((ExtensionAware)project.extensions.findByType(LogoGeneratorsExtension)).extensions.getByType(DESCRIPTOR.extensionClass)
   }
-
-  @Input
-  final MapProperty<Integer, WindowsMainIconExtension.ColorDepth> depths = project.objects.mapProperty(Integer, WindowsMainIconExtension.ColorDepth).convention(
-    projectExtension.depths
-  )
-
-  @Input
-  final SetProperty<Integer> sizes = project.objects.setProperty(Integer).empty()
-
-  void depth(int depth, @DelegatesTo(WindowsMainIconExtension.ColorDepth) Closure configureClosure) {
-    depths.put depth, project.providers.provider {
-      WindowsMainIconExtension.ColorDepth colorDepth = new WindowsMainIconExtension.ColorDepth(project.objects, sizes)
-      ConfigureUtil.configure configureClosure, colorDepth
-    }
-  }
-
-  @Input
-  final Property<Compress> compress = project.objects.property(Compress).convention(
-    projectExtension.compress
-  )
 
   protected final static class ImageMagickConvertOperation extends LogoGenerator.ImageMagickConvertOperation {
     public static final String MAINICON_ICO_FILE_NAME = 'MAINICON.ico'
@@ -159,12 +139,22 @@ final class WindowsMainIcon extends LogoGenerator {
   @Inject
   WindowsMainIcon(WorkerExecutor workerExecutor) {
     this.@workerExecutor = workerExecutor
+    this.@org_fidata_logogen_generators_WindowsMainIconTrait__providerFactory = project.providers
+    this.@org_fidata_logogen_generators_WindowsMainIconTrait__objectFactory = project.objects
+    this.@org_fidata_logogen_generators_WindowsMainIconTrait__depths = this.@org_fidata_logogen_generators_WindowsMainIconTrait__objectFactory.mapProperty(Integer, ColorDepth).convention(
+      projectExtension.depths
+    )
+    this.@org_fidata_logogen_generators_WindowsMainIconTrait__sizes = this.@org_fidata_logogen_generators_WindowsMainIconTrait__objectFactory.setProperty(Integer).empty()
+    this.@org_fidata_logogen_generators_WindowsMainIconTrait__compress = this.@org_fidata_logogen_generators_WindowsMainIconTrait__objectFactory.property(Compress).convention(
+      projectExtension.compress
+    )
+
   }
 
   @TaskAction
   protected void resizeAndConvert() {
     imageMagicConvert workerExecutor, ImageMagickConvertOperation, new WindowsMainIconConfiguration(
-      /*(Map<Integer, WindowsMainIconConfiguration.ColorDepth>)*/depths.get().collectEntries { Integer depth, WindowsMainIconExtension.ColorDepth colorDepth ->
+      /*(Map<Integer, WindowsMainIconConfiguration.ColorDepth>)*/depths.get().collectEntries { Integer depth, ColorDepth colorDepth ->
         [(depth): new WindowsMainIconConfiguration.ColorDepth(colorDepth.sizes.get(), colorDepth.reduction.getOrNull())]
       },
       compress.get()

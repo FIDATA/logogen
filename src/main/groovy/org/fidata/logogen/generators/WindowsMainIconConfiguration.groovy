@@ -11,7 +11,7 @@ final class WindowsMainIconConfiguration implements Serializable {
   final Map<Integer, ColorDepth> depths
 
   @Immutable
-  final static class ColorDepth {
+  final static class ColorDepth implements Serializable {
     final Set<Integer> sizes
     final ColorReduction colorReduction
   }
