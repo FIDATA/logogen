@@ -5,7 +5,7 @@ import org.fidata.logogen.LogoGeneratorDescriptor
 
 @CompileStatic
 LogoGenerator('webclips') { srcFile, includeDir, outputDir, debug ->
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('webclips', Webclips, null)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('webclips', Webclips, Classifiers.WEBSITE, null)
 
   def outputFiles = []
 

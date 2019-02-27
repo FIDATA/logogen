@@ -34,8 +34,8 @@ import javax.inject.Inject
  * 1. https://www.openhub.net/p/{project}/logos/new
  */
 @CompileStatic
-final class OpenHub extends SimpleLogoGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('openhub', OpenHub, null)
+final class OpenHub extends SimpleConverter {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('openhub', OpenHub, 'openhub', null)
 
   @Inject
   OpenHub(WorkerExecutor workerExecutor) {

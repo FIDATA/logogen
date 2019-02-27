@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 /*
- * LogoGeneratorWithRtl Gradle task class
+ * ConverterWithRtl Gradle task class
  * Copyright © 2019  Basil Peace
  *
  * This file is part of Logo Generator.
@@ -20,58 +20,42 @@
 package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
-import org.apache.groovy.json.internal.ArrayUtils
-import org.fidata.logogen.RtlIconGenerationMethod
-import org.gradle.api.Action
-import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.logging.LogLevel
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Optional
-import org.gradle.workers.IsolationMode
-import org.gradle.workers.WorkerConfiguration
+import org.fidata.logogen.shared.RtlLogoGenerationMethod
+import org.fidata.logogen.shared.RtlLogoConfigurationProvider
 import org.gradle.workers.WorkerExecutor
-
 import javax.inject.Inject
 
 /**
  * Logo Generator that is able to generate a separate icon for RTL locale
  */
 @CompileStatic
-abstract class LogoGeneratorWithRtl extends LogoGenerator {
-  /**
-   * Source file for RTL locale
-   */
-  @InputFile
-  @Optional
-  final RegularFileProperty rtlSrcFile = project.objects.fileProperty()
-
-  /**
-   * Method of creation of RTL icon
-   */
-  @Input
-  final Property<RtlIconGenerationMethod> rtlIconGenerationMethod = project.objects.property(RtlIconGenerationMethod).convention project.providers.provider {
-    rtlSrcFile.present ? RtlIconGenerationMethod.SEPARATE_SOURCE : RtlIconGenerationMethod.MIRROW
+abstract class ConverterWithRtl extends Converter {
+  @Delegate(methodAnnotations = true)
+  private final RtlLogoConfigurationProvider rtlLogoConfigurationProvider
+  {
+    rtlLogoConfigurationProvider = new RtlLogoConfigurationProvider(project.objects)
+    rtlLogoGenerationMethod.convention project.providers.provider {
+      rtlSrcFile.present ? RtlLogoGenerationMethod.SEPARATE_SOURCE : RtlLogoGenerationMethod.MIRROW
+    }
   }
 
   /**
    * ImageMagick {@code convert} operation
    *
    * <b>Constructor of class inheriting this one should have
-   * {@code srcFile}, {@code debug}, {@code outputDir}, {@code rtlSrcFile} and {@code rtlIconGenerationMethod}
+   * {@code srcFile}, {@code debug}, {@code outputDir}, {@code rtlSrcFile} and {@code rtlLogoGenerationMethod}
    * as first five arguments and pass them to {@code super} constructor.
    * All other arguments may be placed after these five.</b>
    */
-  abstract protected static class ImageMagickConvertOperation extends LogoGenerator.ImageMagickConvertOperation {
+  abstract protected static class ImageMagickConvertOperation extends Converter.ImageMagickConvertOperation {
     private File rtlSrcFile
-    private RtlIconGenerationMethod rtlIconGenerationMethod
+    private RtlLogoGenerationMethod rtlLogoGenerationMethod
 
     @Inject
-    ImageMagickConvertOperation(File srcFile, boolean debug = false, File outputDir, File rtlSrcFile = null, RtlIconGenerationMethod rtlIconGenerationMethod) {
+    ImageMagickConvertOperation(File srcFile, boolean debug = false, File outputDir, File rtlSrcFile = null, RtlLogoGenerationMethod rtlLogoGenerationMethod) {
       super(srcFile, debug, outputDir)
       this.@rtlSrcFile = rtlSrcFile
-      this.@rtlIconGenerationMethod = rtlIconGenerationMethod
+      this.@rtlLogoGenerationMethod = rtlLogoGenerationMethod
     }
   }
 
@@ -82,7 +66,7 @@ abstract class LogoGeneratorWithRtl extends LogoGenerator {
   protected void imageMagicConvert(WorkerExecutor workerExecutor, Class<? extends ImageMagickConvertOperation> actionClass, Object... params) {
     Object[] newParams = new Object[params.length + 2]
     newParams[0] = rtlSrcFile.getOrNull()
-    newParams[1] = rtlIconGenerationMethod.get()
+    newParams[1] = rtlLogoGenerationMethod.get()
     System.arraycopy(params, 0, newParams, 2, params.length)
     super.imageMagicConvert(workerExecutor, actionClass, newParams)
   }

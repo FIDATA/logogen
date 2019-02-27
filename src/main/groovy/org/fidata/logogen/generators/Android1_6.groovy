@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 /*
- * Android 3.0+ Launcher Icon Generator
+ * Android ]1.5, 3.0[ Launcher Icon Generator
  * Copyright © 2015, 2018-2019  Basil Peace
  *
  * This file is part of Logo Generator.
@@ -19,12 +19,10 @@
  */
 package org.fidata.logogen.generators
 
-import org.fidata.logogen.LogoGeneratorsExtension
+import org.fidata.logogen.annotations.DelegateWithGradleAnnotationsWithoutProviderInterface
 
 import static org.fidata.android.AndroidUtils.*
 import org.fidata.android.DensityFactor
-import org.gradle.api.plugins.ExtensionAware
-import org.gradle.api.provider.SetProperty
 import groovy.transform.CompileStatic
 import org.fidata.imagemagick.Units
 import org.fidata.logogen.LogoGeneratorDescriptor
@@ -35,14 +33,13 @@ import javax.inject.Inject
 import java.math.MathContext
 
 /**
- * Android 3.0+ Launcher Icon
+ * Android ]1.5, 4.3[ Launcher Icon
  *
  * File format: PNG (preferred)/JPG (acceptable)/GIF (discouraged)
- * Directory/file layout: res/mipmap-{density}/ic_launcher.png
+ * Directory/file layout: res/drawable-{density}/ic_launcher.png
  * Size: 48×48 dp
  * Default density: 160
- * Density factors: 0.75 (lpi), 1.0 (mdpi, default), 1.33 (tvdpi),
- *   1.5 (hdpi), 2.0 (xhdpi), 3.0 (xxhdpi), 4.0 (xxxhpdi)
+ * Density factors: 0.75 (lpi), 1.0 (mdpi, default), 1.5 (hdpi), 2.0 (xhdpi)
  *
  * References:
  * 1. Providing alternative resources // App resources overview
@@ -59,20 +56,23 @@ import java.math.MathContext
  *    * https://material.io/design/platform-guidance/android-icons.html
  * 2. This generator doesn't create any special padding, as proposed at
  *    https://android-developers.googleblog.com/2013/07/making-beautiful-android-app-icons.html
- * 3. This generator doesn't use SVG as Vector Drawable image supported since Android 5.0 (API level 21)
- *    that is described at https://developer.android.com/guide/topics/graphics/vector-drawable-resources
- * 4. This generator doesn't create Adaptive icons that were added in Android 8.0 (API level 26) and are described at
- *    https://developer.android.com/guide/practices/ui_guidelines/icon_design_adaptive
  */
 @CompileStatic
-final class Android extends LogoGeneratorWithRtlAndHebrew implements AndroidTrait {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android', Android, AndroidExtension)
+final class Android1_6 extends Converter /* TODO: ConverterWithRtlAndHebrew*/ {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android1.6', Android1_6, Classifiers.ANDROID, Android1_6Extension)
 
-  private AndroidExtension getProjectExtension() {
-    ((ExtensionAware)project.extensions.findByType(LogoGeneratorsExtension)).extensions.getByType(DESCRIPTOR.extensionClass)
+  protected Android1_6Extension getProjectExtension() {
+    getProjectExtension(Android1_6Extension)
   }
 
-  protected final static class ImageMagickConvertOperation extends AndroidPre30.ImageMagickConvertOperation /* TODO */ {
+  @DelegateWithGradleAnnotationsWithoutProviderInterface
+  private final AndroidConfigurationProviderImpl androidConfigurationProvider
+  {
+    androidConfigurationProvider = new AndroidConfigurationProviderImpl(project.providers, project.objects)
+    densityFactors.convention projectExtension.densityFactors
+  }
+
+  protected static class ImageMagickConvertOperation extends Android1_0.ImageMagickConvertOperation {
     private final AndroidConfiguration configuration
 
     ImageMagickConvertOperation(File srcFile, boolean debug = false, File outputDir, AndroidConfiguration configuration) {
@@ -88,7 +88,7 @@ final class Android extends LogoGeneratorWithRtlAndHebrew implements AndroidTrai
       operation.background('none')
 
       configuration.densityFactors.each { DensityFactor densityFactor ->
-        File densityOutputDir = new File(resOutputDir, "mipmap-$densityFactor.name")
+        File densityOutputDir = new File(resOutputDir, "drawable-${densityFactor.name}")
         assert densityOutputDir.mkdirs()
         File outputFile = new File(densityOutputDir, 'ic_launcher.png')
 
@@ -111,15 +111,13 @@ final class Android extends LogoGeneratorWithRtlAndHebrew implements AndroidTrai
   private final WorkerExecutor workerExecutor
 
   @Inject
-  Android(WorkerExecutor workerExecutor) {
+  Android1_6(WorkerExecutor workerExecutor) {
     this.@workerExecutor = workerExecutor
-    this.@org_fidata_logogen_generators_AndroidTrait__densityFactors = project.objects.setProperty(DensityFactor).convention(
-      projectExtension.densityFactors
-    )
   }
 
   @TaskAction
   protected void resizeAndConvert() {
-    imageMagicConvert workerExecutor, ImageMagickConvertOperation, new AndroidConfiguration(densityFactors.get())
+    imageMagicConvert workerExecutor, ImageMagickConvertOperation,
+      androidConfigurationProvider.get()
   }
 }

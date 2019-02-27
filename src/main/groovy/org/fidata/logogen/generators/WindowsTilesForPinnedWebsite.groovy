@@ -31,7 +31,7 @@ import org.fidata.logogen.LogoGeneratorDescriptor
 
 @CompileStatic
 LogoGenerator('WindowsTilesForPinnedWebsite') { srcFile, includeDir, outputDir, debug ->
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsTilesForPinnedWebsite', WindowsTilesForPinnedWebsite, null)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsTilesForPinnedWebsite', WindowsTilesForPinnedWebsite, Classifiers.WEBSITE, null)
 
   def commands = []
   def outputFiles = []
@@ -87,7 +87,7 @@ LogoGenerator('WindowsTilesForPinnedWebsite') { srcFile, includeDir, outputDir, 
   outputFile = file("$outputDir/WindowsTilesForWebsite.html")
   commands.push([type: Task, doLast: {
     XmlTemplateEngine engine = new groovy.text.XmlTemplateEngine()
-    def template = engine.createTemplate(file("$includeDir/favicon.html.gsp"))
+    def template = engine.createTemplate(file("$includeDir/windowsTilesForPinnedWebsite.html.gsp"))
     Map binding = [
       'website_name': project.group,
       'msapplication_config': 'msapplication-config.xml',

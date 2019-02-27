@@ -35,8 +35,8 @@ import javax.inject.Inject
  *    https://ru.gravatar.com/site/implement/images/
  */
 @CompileStatic
-final class Gravatar extends SimpleLogoGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('gravatar', Gravatar, null)
+final class Gravatar extends SimpleConverter {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('gravatar', Gravatar, 'gravatar', null)
 
   @Inject
   Gravatar(WorkerExecutor workerExecutor) {

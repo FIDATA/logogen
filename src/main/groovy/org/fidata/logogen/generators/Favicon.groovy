@@ -31,7 +31,7 @@ import org.fidata.logogen.LogoGeneratorDescriptor
  */
 @CompileStatic
 LogoGenerator('Favicon') { srcFile, includeDir, outputDir, debug ->
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('favicon', Favicon, null)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('favicon', Favicon, Classifiers.WEBSITE, null)
 
   def sizes = [16, 24, 32, 48, 64]
 

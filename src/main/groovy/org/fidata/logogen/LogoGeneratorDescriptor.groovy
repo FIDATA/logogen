@@ -21,7 +21,7 @@ package org.fidata.logogen
 
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
-import org.fidata.logogen.generators.LogoGenerator
+import org.fidata.logogen.generators.Converter
 
 /**
  * Descriptor of Logo Generator
@@ -37,7 +37,14 @@ final class LogoGeneratorDescriptor {
   /**
    * Class implementing generator
    */
-  final Class<? extends LogoGenerator> implementationClass
+  final Class<? extends Converter> implementationClass
+  /**
+   * Classifier groups generators with the same target.
+   * Classifier is used for generated publications, and it is expected
+   * that outputs of all generators with the same classifier
+   * are used by the same consumer
+   */
+  final String classifier
   /**
    * Extension with configuration of generator
    */

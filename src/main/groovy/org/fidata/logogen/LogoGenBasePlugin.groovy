@@ -22,6 +22,7 @@ package org.fidata.logogen
 import com.google.common.collect.ImmutableList
 import groovy.transform.CompileStatic
 import org.fidata.logogen.generators.*
+import org.fidata.logogen.shared.RtlLogoGenerationMethod
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.NamedDomainObjectFactory
 import org.gradle.api.Plugin
@@ -57,9 +58,9 @@ final class LogoGenBasePlugin implements Plugin<Project> {
   }
 
   private static final List<LogoGeneratorDescriptor> DEFAULT_GENERATORS = ImmutableList.copyOf([
-    Android15.DESCRIPTOR,
-    AndroidPre30.DESCRIPTOR,
-    Android.DESCRIPTOR,
+    Android1_0.DESCRIPTOR,
+    Android1_6.DESCRIPTOR,
+    Android4_3.DESCRIPTOR,
     Facebook.DESCRIPTOR,
     Favicon.DESCRIPTOR,
     FreeDesktop.DESCRIPTOR,
@@ -93,14 +94,14 @@ final class LogoGenBasePlugin implements Plugin<Project> {
 
     this.@generators = project.container(LogoGeneratorDescriptor, (NamedDomainObjectFactory)null)
 
-    project.extensions.extraProperties[RtlIconGenerationMethod.simpleName] = RtlIconGenerationMethod
+    project.extensions.extraProperties[RtlLogoGenerationMethod.simpleName] = RtlLogoGenerationMethod
 
     generators.configureEach { LogoGeneratorDescriptor descriptor ->
       if (descriptor.extensionClass != null) {
         ((ExtensionAware)extension).extensions.create(descriptor.name, descriptor.extensionClass)
       }
 
-      Class<? extends LogoGenerator> logoGeneratorClass = descriptor.implementationClass
+      Class<? extends Converter> logoGeneratorClass = descriptor.implementationClass
       project.extensions.extraProperties[logoGeneratorClass.simpleName] = logoGeneratorClass
     }
 

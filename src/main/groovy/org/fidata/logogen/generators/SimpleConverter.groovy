@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 /*
- * SimpleLogoGenerator Gradle task class
+ * SimpleConverter Gradle task class
  * Copyright © 2015, 2018-2019  Basil Peace
  *
  * This file is part of Logo Generator.
@@ -21,19 +21,29 @@ package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
 import org.fidata.imagemagick.Units
+import org.fidata.logogen.shared.LogoNameConfigurationProvider
 import org.gradle.api.tasks.TaskAction
 import org.gradle.workers.WorkerExecutor
 import org.im4java.core.IMOperation
 import javax.inject.Inject
 
 @CompileStatic
-abstract class SimpleLogoGenerator extends LogoGenerator {
+abstract class SimpleConverter extends Converter {
   private final WorkerExecutor workerExecutor
   private final int size
   private final String format
   private final Integer density
 
-  final protected static class ImageMagickResizeAndConvertOperation extends LogoGenerator.ImageMagickConvertOperation {
+  @Delegate(methodAnnotations = true)
+  private final LogoNameConfigurationProvider logoNameConfigurationProvider
+  {
+    logoNameConfigurationProvider = new LogoNameConfigurationProvider(project.objects)
+    logoName.convention(project.providers.provider {
+      project.group.toString()
+    })
+  }
+
+  final protected static class ImageMagickResizeAndConvertOperation extends Converter.ImageMagickConvertOperation {
     private final int size
     private final Integer density
     private final File outputFile
@@ -62,7 +72,7 @@ abstract class SimpleLogoGenerator extends LogoGenerator {
     }
   }
 
-  SimpleLogoGenerator(WorkerExecutor workerExecutor, int size, String format, Integer density = null) {
+  SimpleConverter(WorkerExecutor workerExecutor, int size, String format, Integer density = null) {
     this.@workerExecutor = workerExecutor
     this.@size = size
     this.@format = format
@@ -71,6 +81,9 @@ abstract class SimpleLogoGenerator extends LogoGenerator {
 
   @TaskAction
   protected final void resizeAndConvert() {
-    imageMagicConvert workerExecutor, ImageMagickResizeAndConvertOperation, size, density, "${ project.group }.$format".toString()
+    imageMagicConvert workerExecutor, ImageMagickResizeAndConvertOperation,
+      size,
+      density,
+      "${ logoName.get() }.$format".toString()
   }
 }

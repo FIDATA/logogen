@@ -10,6 +10,9 @@ enum Compress {
   LOSSLESS('Lossless'),
   LZW('LZW'),
   RLE('RLE'),
+  /**
+   * When writing an ICO file, you may request that the images be encoded in PNG format, by specifying Zip compression.
+   */
   ZIP('Zip')
 
   final String name

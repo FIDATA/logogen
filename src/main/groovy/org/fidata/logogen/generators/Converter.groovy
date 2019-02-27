@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 /*
- * LogoGenerator Gradle task class
+ * Converter Gradle task class
  * Copyright © 2015, 2018-2019  Basil Peace
  *
  * This file is part of Logo Generator.
@@ -24,14 +24,15 @@ import groovy.text.Template
 import groovy.text.TemplateEngine
 import groovy.text.XmlTemplateEngine
 import groovy.transform.CompileStatic
+import org.fidata.logogen.LogoGeneratorsExtension
+import org.fidata.logogen.shared.LogoConfigurationProvider
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.logging.LogLevel
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.workers.IsolationMode
 import org.gradle.workers.WorkerConfiguration
@@ -49,12 +50,22 @@ import org.gradle.api.tasks.TaskAction
  */
 @CacheableTask
 @CompileStatic
-abstract class LogoGenerator extends DefaultTask {
-  /**
-   * Source file
-   */
-  @InputFile
-  final RegularFileProperty srcFile = project.objects.fileProperty()
+abstract class Converter extends DefaultTask {
+  protected <T> T getProjectExtension(Class<T> extensionClass) {
+    ((ExtensionAware)project.extensions.findByType(LogoGeneratorsExtension)).extensions.getByType(extensionClass)
+  }
+
+  static final class Classifiers {
+    public static final String WEBSITE = 'website'
+    // Operating Systems
+    public static final String WINDOWS = 'windows'
+    public static final String ANDROID = 'android'
+    public static final String IOS = 'ios'
+    public static final String BLACKBERRY = 'blackberry'
+  }
+
+  @Delegate(methodAnnotations = true)
+  private final LogoConfigurationProvider logoConfigurationProvider = new LogoConfigurationProvider(project.objects)
 
   /**
    * Output directory

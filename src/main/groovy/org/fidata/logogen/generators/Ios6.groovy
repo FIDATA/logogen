@@ -46,7 +46,7 @@ import org.fidata.logogen.LogoGeneratorDescriptor
 */
 @CompileStatic
 LogoGenerator('iOS6') { srcFile, includeDir, outputDir, debug ->
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('ios6', Ios6, null)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('ios6', Ios6, Classifiers.IOS, null)
 
   def size = 120
   Properties binding = new Properties()

@@ -20,17 +20,19 @@
 package org.fidata.logogen
 
 import groovy.transform.CompileStatic
-import org.fidata.logogen.generators.LogoGenerator
-import org.fidata.logogen.generators.LogoGeneratorWithRtl
-import org.fidata.logogen.generators.LogoGeneratorWithRtlAndHebrew
+import org.fidata.logogen.generators.Converter
+import org.fidata.logogen.shared.Background
+import org.fidata.logogen.shared.HebrewLogo
+import org.fidata.logogen.shared.HebrewLogoGenerationMethod
+import org.fidata.logogen.shared.LogoName
+import org.fidata.logogen.shared.RtlLogo
+import org.fidata.logogen.shared.RtlLogoGenerationMethod
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.internal.plugins.DslObject
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.language.base.plugins.LifecycleBasePlugin
-
-import java.security.cert.Extension
 
 /**
  * org.fidata.logogen Gradle Project plugin
@@ -55,6 +57,9 @@ final class LogoGenPlugin implements Plugin<Project> {
     LogoGenBasePlugin basePlugin = project.plugins.apply(LogoGenBasePlugin)
 
     LogoGenExtension extension = project.extensions.create(EXTENSION_NAME, LogoGenExtension)
+    extension.logoName.convention(project.providers.provider {
+      project.group.toString()
+    })
 
     TaskProvider<Task> rootTaskProvider = project.tasks.register(ROOT_TASK_NAME)
     project.plugins.withType(LifecycleBasePlugin) {
@@ -64,31 +69,40 @@ final class LogoGenPlugin implements Plugin<Project> {
     }
 
     basePlugin.generators.configureEach { LogoGeneratorDescriptor descriptor ->
-      TaskProvider<LogoGenerator> logoGeneratorProvider = project.tasks.register(descriptor.name, descriptor.implementationClass) { LogoGenerator logoGenerator ->
+      TaskProvider<Converter> logoGeneratorProvider = project.tasks.register(descriptor.name, descriptor.implementationClass) { Converter logoGenerator ->
         logoGenerator.group = LifecycleBasePlugin.BUILD_GROUP
-        logoGenerator.srcFile.convention extension.srcFile
         logoGenerator.outputDir.set project.layout.buildDirectory.dir(descriptor.name)
-        if (LogoGeneratorWithRtl.isInstance(logoGenerator)) {
-          LogoGeneratorWithRtl logoGeneratorWithRtl = (LogoGeneratorWithRtl)logoGenerator
-          logoGeneratorWithRtl.rtlSrcFile.convention extension.rtlSrcFile
-          logoGeneratorWithRtl.rtlIconGenerationMethod.convention project.providers.provider {
-            logoGeneratorWithRtl.rtlSrcFile.present
-              ? RtlIconGenerationMethod.SEPARATE_SOURCE
-              : extension.rtlIconGenerationMethod.get() != RtlIconGenerationMethod.SEPARATE_SOURCE
-                ? extension.rtlIconGenerationMethod.get()
-                : RtlIconGenerationMethod.MIRROW
+        // Logo
+        logoGenerator.srcFile.convention extension.srcFile
+        if (RtlLogo.isInstance(logoGenerator)) {
+          RtlLogo rtlLogo = (RtlLogo)logoGenerator
+          rtlLogo.rtlSrcFile.convention extension.rtlSrcFile
+          rtlLogo.rtlLogoGenerationMethod.convention project.providers.provider {
+            rtlLogo.rtlSrcFile.present
+              ? RtlLogoGenerationMethod.SEPARATE_SOURCE
+              : extension.rtlLogoGenerationMethod.get() != RtlLogoGenerationMethod.SEPARATE_SOURCE
+              ? extension.rtlLogoGenerationMethod.get()
+              : RtlLogoGenerationMethod.MIRROW
           }
-          if (LogoGeneratorWithRtlAndHebrew.isInstance(logoGeneratorWithRtl)) {
-            LogoGeneratorWithRtlAndHebrew logoGeneratorWithRtlAndHebrew = (LogoGeneratorWithRtlAndHebrew)logoGeneratorWithRtl
-            logoGeneratorWithRtlAndHebrew.hebrewSrcFile.convention extension.hebrewSrcFile
-            logoGeneratorWithRtlAndHebrew.hebrewIconGenerationMethod.convention project.providers.provider {
-              logoGeneratorWithRtlAndHebrew.hebrewSrcFile.present
-                ? HebrewIconGenerationMethod.SEPARATE_SOURCE
-                : extension.hebrewIconGenerationMethod.get() != HebrewIconGenerationMethod.SEPARATE_SOURCE
-                  ? extension.hebrewIconGenerationMethod.get()
-                  : HebrewIconGenerationMethod.STANDARD_RTL
-            }
+        }
+        if (HebrewLogo.isInstance(logoGenerator)) {
+          HebrewLogo hebrewLogo = (HebrewLogo)logoGenerator
+          hebrewLogo.hebrewSrcFile.convention extension.hebrewSrcFile
+          hebrewLogo.hebrewLogoGenerationMethod.convention project.providers.provider {
+            hebrewLogo.hebrewSrcFile.present
+              ? HebrewLogoGenerationMethod.SEPARATE_SOURCE
+              : extension.hebrewLogoGenerationMethod.get() != HebrewLogoGenerationMethod.SEPARATE_SOURCE
+                ? extension.hebrewLogoGenerationMethod.get()
+                : HebrewLogoGenerationMethod.STANDARD_RTL
           }
+        }
+        if (LogoName.isInstance(logoGenerator)) {
+          LogoName logoName = (LogoName)logoGenerator
+          logoName.logoName.convention extension.logoName
+        }
+        if (Background.isInstance(logoGenerator)) {
+          Background background = (Background)logoGenerator
+          background.background.convention extension.background
         }
       }
       rootTaskProvider.configure { Task rootTask ->
@@ -103,13 +117,13 @@ final class LogoGenPlugin implements Plugin<Project> {
           windows_mainicon { contents {
             from "$buildDir/windows_mainicon"
           } }
-        2. ArtifactoryPublish & plugications
+        2. ArtifactoryPublish & publications
        */
       // TODO: webclips ??
     }
 
     basePlugin.generators.whenObjectRemoved { LogoGeneratorDescriptor descriptor ->
-      project.tasks.withType(descriptor.implementationClass).named(descriptor.name).configure { LogoGenerator logoGenerator ->
+      project.tasks.withType(descriptor.implementationClass).named(descriptor.name).configure { Converter logoGenerator ->
         logoGenerator.enabled = false
       }
     }

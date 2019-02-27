@@ -33,8 +33,8 @@ import javax.inject.Inject
  * References:
  */
 @CompileStatic
-final class Twitter extends SimpleLogoGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('twitter', Twitter, null)
+final class Twitter extends SimpleConverter {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('twitter', Twitter, 'twitter', null)
 
   @Inject
   Twitter(WorkerExecutor workerExecutor) {

@@ -33,8 +33,8 @@ import javax.inject.Inject
  * References:
  */
 @CompileStatic
-final class GooglePlus extends SimpleLogoGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('googlePlus', GooglePlus, null)
+final class GooglePlus extends SimpleConverter {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('googlePlus', GooglePlus, 'googlePlus', null)
 
   @Inject
   GooglePlus(WorkerExecutor workerExecutor) {

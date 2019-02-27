@@ -35,8 +35,8 @@ import javax.inject.Inject
  *    https://help.github.com/articles/how-do-i-set-up-my-profile-picture/
  */
 @CompileStatic
-final class GitHub extends SimpleLogoGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('github', GitHub, null)
+final class GitHub extends SimpleConverter {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('github', GitHub, 'github', null)
 
   @Inject
   GitHub(WorkerExecutor workerExecutor) {

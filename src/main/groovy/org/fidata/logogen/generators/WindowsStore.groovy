@@ -37,8 +37,8 @@ import javax.inject.Inject
  *    https://msdn.microsoft.com/en-US/library/windows/apps/mt148529.aspx#icon
  */
 @CompileStatic
-final class WindowsStore extends SimpleLogoGenerator {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsStore', WindowsStore, null)
+final class WindowsStore extends SimpleConverter {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsStore', WindowsStore, 'windowsStore', null)
 
   @Inject
   WindowsStore(WorkerExecutor workerExecutor) {

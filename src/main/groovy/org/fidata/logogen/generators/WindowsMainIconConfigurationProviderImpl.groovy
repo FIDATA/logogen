@@ -6,6 +6,7 @@ import org.fidata.imagemagick.quantization.color.ColorReduction
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
@@ -14,7 +15,7 @@ import org.gradle.api.tasks.Nested
 import org.gradle.util.ConfigureUtil
 
 @CompileStatic
-trait WindowsMainIconTrait {
+class WindowsMainIconConfigurationProviderImpl {
   @Nested
   final MapProperty<Integer, ColorDepth> depths
 
@@ -31,8 +32,29 @@ trait WindowsMainIconTrait {
   @Input
   final Property<Compress> compress
 
-  protected final ProviderFactory providerFactory
-  protected final ObjectFactory objectFactory
+  @Delegate
+  private final Provider<WindowsMainIconConfiguration> provider
+
+  private final ProviderFactory providerFactory
+  private final ObjectFactory objectFactory
+
+  WindowsMainIconConfigurationProviderImpl(ProviderFactory providerFactory, ObjectFactory objectFactory) {
+    this.@providerFactory = providerFactory
+    this.@objectFactory = objectFactory
+
+    this.@depths = objectFactory.mapProperty(Integer, ColorDepth)
+    this.@sizes = objectFactory.setProperty(Integer).empty()
+    this.@compress = objectFactory.property(Compress)
+
+    this.@provider = providerFactory.provider {
+      new WindowsMainIconConfiguration(
+        /*(Map<Integer, WindowsMainIconConfiguration.ColorDepth>)*/depths.get().collectEntries { Integer depth, WindowsMainIconConfigurationProviderImpl.ColorDepth colorDepth ->
+          [(depth): new WindowsMainIconConfiguration.ColorDepth(colorDepth.sizes.get(), colorDepth.reduction.getOrNull())]
+        },
+        compress.get(),
+      )
+    }
+  }
 
   final static class ColorDepth {
     @Input

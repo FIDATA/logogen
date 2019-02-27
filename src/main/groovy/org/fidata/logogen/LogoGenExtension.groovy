@@ -19,67 +19,36 @@
  */
 package org.fidata.logogen
 
-
-import org.gradle.api.file.RegularFileProperty
+import groovy.transform.CompileStatic
+import org.fidata.logogen.annotations.DelegateWithoutProviderInterface
+import org.fidata.logogen.shared.HebrewLogoGenerationMethod
+import org.fidata.logogen.shared.LogoNameConfigurationProvider
+import org.fidata.logogen.shared.BackgroundConfigurationProvider
+import org.fidata.logogen.shared.HebrewLogoConfigurationProvider
+import org.fidata.logogen.shared.LogoConfigurationProvider
+import org.fidata.logogen.shared.RtlLogoGenerationMethod
+import org.fidata.logogen.shared.RtlLogoConfigurationProvider
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
-
 import javax.inject.Inject
-import java.awt.Color
+
 import org.gradle.api.Project
 
 /**
  * logogen extension for {@link Project}
  */
+@CompileStatic
 final class LogoGenExtension {
-  /**
-   * Logo source, in SVG format
-   */
-  final RegularFileProperty srcFile
-
-  /**
-   * Logo source for RTL locales, in SVG format
-   */
-  final RegularFileProperty rtlSrcFile
-
-  /**
-   * Logo source for Hebrew locale, in SVG format
-   */
-  final RegularFileProperty hebrewSrcFile
-
-  /**
-   * Background color.
-   * It is used by generators that require opaque background
-   */
-  final Property<Color> background
-
-  /**
-   * Method of creation of RTL icon.
-   * By default it is {@link RtlIconGenerationMethod#SEPARATE_SOURCE}
-   * if {@link #rtlSrcFile} is set
-   * and {@link RtlIconGenerationMethod#MIRROW} otherwise
-   */
-  final Property<RtlIconGenerationMethod> rtlIconGenerationMethod
-
-  /**
-   * Method of creation of Hebrew icon.
-   * By default it is {@link HebrewIconGenerationMethod#SEPARATE_SOURCE}
-   * if {@link #hebrewSrcFile} is set
-   * and {@link HebrewIconGenerationMethod#STANDARD_RTL} otherwise
-   */
-  final Property<HebrewIconGenerationMethod> hebrewIconGenerationMethod
-
-  /**
-   * Sets background color by name.
-   * In current version it is decoded with {@link Color#decode(String)}.
-   * This could be changed in the future to support more color names
-   *
-   * @param background Color name
-   */
-  void setBackground(String background) {
-    this.@background.set Color.decode(background)
-  }
+  @DelegateWithoutProviderInterface
+  private final LogoConfigurationProvider logoConfigurationProvider
+  @DelegateWithoutProviderInterface
+  private final RtlLogoConfigurationProvider rtlLogoConfigurationProvider
+  @DelegateWithoutProviderInterface
+  private final HebrewLogoConfigurationProvider hebrewLogoConfigurationProvider
+  @DelegateWithoutProviderInterface
+  private final BackgroundConfigurationProvider backgroundConfigurationProvider
+  @DelegateWithoutProviderInterface
+  private final LogoNameConfigurationProvider logoNameConfigurationProvider
 
   /**
    * Construct new LogoGenExtension object
@@ -89,15 +58,17 @@ final class LogoGenExtension {
    */
   @Inject
   protected LogoGenExtension(ProviderFactory providerFactory, ObjectFactory objectFactory) {
-    srcFile = objectFactory.fileProperty()
-    rtlSrcFile = objectFactory.fileProperty()
-    hebrewSrcFile = objectFactory.fileProperty()
-    background = objectFactory.property(Color)
-    rtlIconGenerationMethod = objectFactory.property(RtlIconGenerationMethod).convention providerFactory.provider {
-      rtlSrcFile.present ? RtlIconGenerationMethod.SEPARATE_SOURCE : RtlIconGenerationMethod.MIRROW
+    this.@logoConfigurationProvider = new LogoConfigurationProvider(objectFactory)
+    this.@rtlLogoConfigurationProvider = new RtlLogoConfigurationProvider(objectFactory)
+    this.@hebrewLogoConfigurationProvider = new HebrewLogoConfigurationProvider(objectFactory)
+    this.@backgroundConfigurationProvider = new BackgroundConfigurationProvider(objectFactory)
+    this.@logoNameConfigurationProvider = new LogoNameConfigurationProvider(objectFactory)
+
+    rtlLogoGenerationMethod.convention providerFactory.provider {
+      rtlSrcFile.present ? RtlLogoGenerationMethod.SEPARATE_SOURCE : RtlLogoGenerationMethod.MIRROW
     }
-    hebrewIconGenerationMethod = objectFactory.property(HebrewIconGenerationMethod).convention providerFactory.provider {
-      hebrewSrcFile.present ? HebrewIconGenerationMethod.SEPARATE_SOURCE : HebrewIconGenerationMethod.STANDARD_RTL
+    hebrewLogoGenerationMethod.convention providerFactory.provider {
+      hebrewSrcFile.present ? HebrewLogoGenerationMethod.SEPARATE_SOURCE : HebrewLogoGenerationMethod.STANDARD_RTL
     }
   }
 }

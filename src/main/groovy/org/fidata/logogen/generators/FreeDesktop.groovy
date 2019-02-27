@@ -22,10 +22,11 @@ package org.fidata.logogen.generators
 import groovy.transform.CompileStatic
 import org.fidata.imagemagick.Units
 import org.fidata.logogen.LogoGeneratorDescriptor
+import org.fidata.logogen.annotations.DelegateWithGradleAnnotationsWithoutProviderInterface
+import org.fidata.logogen.shared.LogoNameConfigurationProvider
 import org.gradle.api.tasks.TaskAction
 import org.gradle.workers.WorkerExecutor
 import org.im4java.core.IMOperation
-
 import javax.inject.Inject
 
 /*
@@ -59,51 +60,34 @@ import javax.inject.Inject
       http://tango.freedesktop.org/Tango_Icon_Theme_Guidelines
 */
 @CompileStatic
-final class FreeDesktop extends LogoGenerator /* TODO: WithRtl? */ {
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('freeDesktop', FreeDesktop, null)
+final class FreeDesktop extends Converter {
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('freeDesktop', FreeDesktop, 'freedesktop', FreeDesktopExtension)
 
-  outputDir = "$outputDir/hicolor"
-  def commands = []
-  def outputFiles = []
-
-  def sizes = [16, 22, 24, 32, 36, 48, 64, 72, 96, 128, 192, 256, 512]
-
-  def args = [imconv,
-  ] + (debug ? ['-verbose'] : []) + [
-    '-background', 'none',
-    '-density', '96',
-    '-units', Units.PIXELSPERINCH.toString(),
-    srcFile,
-  ]
-  sizes.eachWithIndex { size, i ->
-    def outputFile = file("$outputDir/${size}x${size}/apps/${project.group}.png")
-    def last = (i == (sizes.size() - 1))
-    args += (last ? [] : ['(',
-      '-clone', '0']) +
-      ['-resize', "${size}x${size}"] +
-      (last ? [] : ['-write']) + [outputFile] +
-      (last ? [] : ['+delete', ')'])
-    outputFiles.push outputFile
+  protected FreeDesktopExtension getProjectExtension() {
+    getProjectExtension(FreeDesktopExtension)
   }
-  commands.push([type: Exec, commandLine: args, outputFiles: outputFiles])
 
-  def outputFile = file("$outputDir/scalable/${project.group}.svg")
-  args = [
-    'svgo',
-    srcFile,
-    '--config=' + file("$includePath/freedesktop.svgo.config.json"),
-    outputFile
-  ]
-  commands.push([type: CrossPlatformExec, commandLine: args, outputFiles: [outputFile]])
+  @Delegate(methodAnnotations = true)
+  private final LogoNameConfigurationProvider logoNameConfigurationProvider
+  {
+    logoNameConfigurationProvider = new LogoNameConfigurationProvider(project.objects)
+    logoName.convention(project.providers.provider {
+      project.group.toString()
+    })
+  }
 
-  return commands
+  @DelegateWithGradleAnnotationsWithoutProviderInterface
+  private final FreeDesktopConfigurationProviderImpl freeDesktopConfigurationProvider
+  {
+    freeDesktopConfigurationProvider = new FreeDesktopConfigurationProviderImpl(project.providers, project.objects)
+    sizes.convention projectExtension.sizes
+  }
 
-  protected final static class ImageMagickConvertOperation extends LogoGenerator.ImageMagickConvertOperation {
-    public static final String MAINICON_ICO_FILE_NAME = 'MAINICON.ico'
+  protected final static class ImageMagickConvertOperation extends Converter.ImageMagickConvertOperation {
+    private final String logoName
+    private final FreeDesktopConfiguration configuration
 
-    private final WindowsMainIconConfiguration configuration
-
-    ImageMagickConvertOperation(File srcFile, boolean debug, File outputDir, WindowsMainIconConfiguration configuration) {
+    ImageMagickConvertOperation(File srcFile, boolean debug, File outputDir, String logoName, FreeDesktopConfiguration configuration) {
       super(srcFile, debug, outputDir)
       this.@configuration = configuration
     }
@@ -114,32 +98,30 @@ final class FreeDesktop extends LogoGenerator /* TODO: WithRtl? */ {
       operation
         .background('none')
         .units(Units.PIXELSPERINCH.toString())
+        .density(96)
 
-      File outputFile = new File(super.outputDir, MAINICON_ICO_FILE_NAME)
+      File outputSubdir = new File(super.outputDir, configuration.theme)
 
-      configuration.depths.each { Integer depth, WindowsMainIconConfiguration.ColorDepth colorDepth ->
-        IMOperation colorReductionOperation = colorDepth.colorReduction?.toIMOperation()
-        for (Integer size in colorDepth.sizes) {
-          operation.openOperation()
-            .clone(0)
-          if (colorReductionOperation != null) {
-            operation.addOperation(colorReductionOperation)
-          }
-          if (depth != null) { // TODO
-            operation.colors(2**depth)
-          }
-          operation.resize(size, size)
-          if (depth != null) { // TODO
-            operation.depth(depth)
-          }
-          operation.closeOperation()
-        }
+      configuration.sizes.each { Integer size ->
+        File outputFile = new File(outputSubdir, "${ size }x${ size }/apps/${ logoName }.png"))
+        operation.openOperation()
+          .clone(0)
+          .resize(size, size)
+          .write(outputFile.toString())
+        operation.closeOperation()
       }
 
       operation
-        .delete(0)
-        .compress(configuration.compress.toString())
-        .write(outputFile.toString())
+        .write(new File(outputSubdir, "scalable/apps/${ logoName }.svg").toString())
+        // .delete(0)
+
+      /* TODO: run svgo
+      args = [
+        'svgo',
+        srcFile,
+        '--config=' + file("$includePath/freedesktop.svgo.config.json"),
+        outputFile
+      ]*/
 
       operation
     }
@@ -154,6 +136,8 @@ final class FreeDesktop extends LogoGenerator /* TODO: WithRtl? */ {
 
   @TaskAction
   protected void resizeAndConvert() {
-    imageMagicConvert workerExecutor, ImageMagickConvertOperation
+    imageMagicConvert workerExecutor, ImageMagickConvertOperation,
+      logoName.get(),
+      freeDesktopConfigurationProvider.get()
   }
 }

@@ -32,7 +32,7 @@ import org.fidata.logogen.LogoGeneratorDescriptor
 */
 @CompileStatic
 LogoGenerator('iOS') { srcFile, includeDir, outputDir, debug ->
-  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('ios', Ios, null)
+  public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('ios', Ios, Classifiers.IOS, null)
 
   // outputDir = file("$outputDir/icon.iconset")
   def commands = []

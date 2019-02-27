@@ -4,14 +4,16 @@ import groovy.transform.CompileStatic
 import groovy.transform.KnownImmutable
 import org.fidata.android.DensityFactor
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ProviderFactory
+
 import javax.inject.Inject
 
 @KnownImmutable
 @CompileStatic
-final class AndroidPre30Extension extends AbstractAndroidExtension {
+final class Android1_6Extension extends AbstractAndroidExtension {
   @Inject
-  AndroidPre30Extension(ObjectFactory objectFactory) {
-    super(objectFactory)
+  Android1_6Extension(ProviderFactory providerFactory, ObjectFactory objectFactory) {
+    super(providerFactory, objectFactory)
     densityFactors.convention([DensityFactor.LDPI, DensityFactor.MDPI, DensityFactor.HDPI, DensityFactor.XHDPI])
   }
 }
