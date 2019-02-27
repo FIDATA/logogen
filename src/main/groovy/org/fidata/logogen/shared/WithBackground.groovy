@@ -6,7 +6,7 @@ import org.gradle.api.tasks.Input
 import java.awt.Color
 
 @CompileStatic
-interface Background {
+interface WithBackground {
   /**
    * Background color.
    * It is used by generators that require opaque background

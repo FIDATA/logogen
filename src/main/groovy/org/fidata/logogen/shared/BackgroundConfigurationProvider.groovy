@@ -6,7 +6,7 @@ import org.gradle.api.provider.Property
 import java.awt.Color
 
 @CompileStatic
-class BackgroundConfigurationProvider implements Background {
+class BackgroundConfigurationProvider implements WithBackground {
   final Property<Color> background
 
   /**

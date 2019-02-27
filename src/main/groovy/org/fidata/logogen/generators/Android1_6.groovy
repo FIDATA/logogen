@@ -58,7 +58,7 @@ import java.math.MathContext
  *    https://android-developers.googleblog.com/2013/07/making-beautiful-android-app-icons.html
  */
 @CompileStatic
-final class Android1_6 extends Converter /* TODO: ConverterWithRtlAndHebrew*/ {
+final class Android1_6 extends Generator.Converter /* TODO: ConverterWithRtlAndHebrew*/ {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android1.6', Android1_6, Classifiers.ANDROID, Android1_6Extension)
 
   protected Android1_6Extension getProjectExtension() {

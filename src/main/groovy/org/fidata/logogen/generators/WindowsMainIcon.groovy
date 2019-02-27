@@ -73,7 +73,7 @@ import javax.inject.Inject
  *    a note in the end of this article: https://www.creativefreedom.co.uk/icon-designers-blog/windows-7-icon-sizes/
  */
 @CompileStatic
-final class WindowsMainIcon extends Converter {
+final class WindowsMainIcon extends Generator.Converter {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsMainIcon', WindowsMainIcon, Classifiers.WINDOWS, WindowsMainIconExtension)
 
   protected WindowsMainIconExtension getProjectExtension() {
@@ -88,7 +88,7 @@ final class WindowsMainIcon extends Converter {
     compress.convention projectExtension.compress
   }
 
-  protected final static class ImageMagickConvertOperation extends Converter.ImageMagickConvertOperation {
+  protected final static class ImageMagickConvertOperation extends Generator.Converter.ImageMagickConvertOperation {
     public static final String MAINICON_ICO_FILE_NAME = 'MAINICON.ico'
 
     private final WindowsMainIconConfiguration configuration

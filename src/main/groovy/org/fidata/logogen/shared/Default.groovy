@@ -5,7 +5,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
 
 @CompileStatic
-interface Logo {
+interface Default {
   /**
    * Source file, in SVG format
    */

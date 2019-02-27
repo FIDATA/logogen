@@ -8,7 +8,7 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 
 @CompileStatic
-interface HebrewLogo {
+interface WithHebrew {
   /**
    * Source file for Hebrew locale, in SVG format.
    * Provided as separate since Hebrew has different rules

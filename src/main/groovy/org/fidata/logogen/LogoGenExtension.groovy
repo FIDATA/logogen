@@ -22,12 +22,12 @@ package org.fidata.logogen
 import groovy.transform.CompileStatic
 import org.fidata.logogen.annotations.DelegateWithoutProviderInterface
 import org.fidata.logogen.shared.HebrewLogoGenerationMethod
-import org.fidata.logogen.shared.LogoNameConfigurationProvider
+import org.fidata.logogen.shared.NameConfigurationProvider
 import org.fidata.logogen.shared.BackgroundConfigurationProvider
-import org.fidata.logogen.shared.HebrewLogoConfigurationProvider
-import org.fidata.logogen.shared.LogoConfigurationProvider
+import org.fidata.logogen.shared.HebrewConfigurationProvider
+import org.fidata.logogen.shared.DefaultConfigurationProvider
 import org.fidata.logogen.shared.RtlLogoGenerationMethod
-import org.fidata.logogen.shared.RtlLogoConfigurationProvider
+import org.fidata.logogen.shared.RtlConfigurationProvider
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ProviderFactory
 import javax.inject.Inject
@@ -39,16 +39,16 @@ import org.gradle.api.Project
  */
 @CompileStatic
 final class LogoGenExtension {
+  @DelegateWithoutProviderInterface // TODO
+  private final DefaultConfigurationProvider defaultConfigurationProvider
   @DelegateWithoutProviderInterface
-  private final LogoConfigurationProvider logoConfigurationProvider
+  private final RtlConfigurationProvider rtlConfigurationProvider
   @DelegateWithoutProviderInterface
-  private final RtlLogoConfigurationProvider rtlLogoConfigurationProvider
-  @DelegateWithoutProviderInterface
-  private final HebrewLogoConfigurationProvider hebrewLogoConfigurationProvider
+  private final HebrewConfigurationProvider hebrewConfigurationProvider
   @DelegateWithoutProviderInterface
   private final BackgroundConfigurationProvider backgroundConfigurationProvider
   @DelegateWithoutProviderInterface
-  private final LogoNameConfigurationProvider logoNameConfigurationProvider
+  private final NameConfigurationProvider nameConfigurationProvider
 
   /**
    * Construct new LogoGenExtension object
@@ -58,11 +58,11 @@ final class LogoGenExtension {
    */
   @Inject
   protected LogoGenExtension(ProviderFactory providerFactory, ObjectFactory objectFactory) {
-    this.@logoConfigurationProvider = new LogoConfigurationProvider(objectFactory)
-    this.@rtlLogoConfigurationProvider = new RtlLogoConfigurationProvider(objectFactory)
-    this.@hebrewLogoConfigurationProvider = new HebrewLogoConfigurationProvider(objectFactory)
+    this.@defaultConfigurationProvider = new DefaultConfigurationProvider(objectFactory)
+    this.@rtlConfigurationProvider = new RtlConfigurationProvider(objectFactory)
+    this.@hebrewConfigurationProvider = new HebrewConfigurationProvider(objectFactory)
     this.@backgroundConfigurationProvider = new BackgroundConfigurationProvider(objectFactory)
-    this.@logoNameConfigurationProvider = new LogoNameConfigurationProvider(objectFactory)
+    this.@nameConfigurationProvider = new NameConfigurationProvider(objectFactory)
 
     rtlLogoGenerationMethod.convention providerFactory.provider {
       rtlSrcFile.present ? RtlLogoGenerationMethod.SEPARATE_SOURCE : RtlLogoGenerationMethod.MIRROW

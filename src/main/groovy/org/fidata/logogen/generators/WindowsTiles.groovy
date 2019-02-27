@@ -49,10 +49,10 @@ import java.math.MathContext
       https://msdn.microsoft.com/en-us/library/windows/apps/hh965372.aspx
 */
 @CompileStatic
-final class WindowsTiles extends Converter {
+final class WindowsTiles extends Generator.Converter {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('windowsTiles', org.fidata.logogen.generators.WindowsTiles, 'windowsRT')
 
-  static final class ImageMagicConvertOperation extends Converter.ImageMagickConvertOperation {
+  static final class ImageMagicConvertOperation extends Generator.Converter.ImageMagickConvertOperation {
     private static final List<BigDecimal> SIZES_DP = ImmutableList.of(
       70.0,
       150.0
@@ -100,7 +100,7 @@ final class WindowsTiles extends Converter {
     }
   }
 
-  static final class GenerateXmlOperation extends Converter.GenerateXmlOperation {
+  static final class GenerateXmlOperation extends Generator.Converter.GenerateXmlOperation {
     @Inject
     GenerateXmlOperation() {
       super('VisualElementsManifest.xml.gsp')

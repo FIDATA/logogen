@@ -22,9 +22,8 @@ package org.fidata.logogen
 import com.google.common.collect.ImmutableList
 import groovy.transform.CompileStatic
 import org.fidata.logogen.generators.*
+import org.fidata.logogen.shared.HebrewLogoGenerationMethod
 import org.fidata.logogen.shared.RtlLogoGenerationMethod
-import org.gradle.api.NamedDomainObjectContainer
-import org.gradle.api.NamedDomainObjectFactory
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
@@ -39,50 +38,32 @@ final class LogoGenBasePlugin implements Plugin<Project> {
    */
   public static final String EXTENSION_NAME = 'logoGenerators'
 
-  private NamedDomainObjectContainer<LogoGeneratorDescriptor> generators
-
-  /**
-   * Collection of descriptors of available generators.
-   * Custom generators could be registered here from build script or by custom plugin.
-   * If {@code org.fidata.logogen} plugin is applied,
-   * it will create a task for each registered generator.
-   *
-   * Removing items from this collection is supported, but discouraged.
-   * If an already registered generator is removed
-   * then the corresponding task will remain created, but will be disabled
-   *
-   * @return collection of generators
-   */
-  NamedDomainObjectContainer<LogoGeneratorDescriptor> getGenerators() {
-    this.@generators
-  }
-
-  private static final List<LogoGeneratorDescriptor> DEFAULT_GENERATORS = ImmutableList.copyOf([
-    Android1_0.DESCRIPTOR,
-    Android1_6.DESCRIPTOR,
-    Android4_3.DESCRIPTOR,
-    Facebook.DESCRIPTOR,
-    Favicon.DESCRIPTOR,
-    FreeDesktop.DESCRIPTOR,
-    GitHub.DESCRIPTOR,
-    GooglePlay.DESCRIPTOR,
-    GooglePlus.DESCRIPTOR,
-    Gravatar.DESCRIPTOR,
-    Ios.DESCRIPTOR,
-    Ios6.DESCRIPTOR,
-    LaunchPad.DESCRIPTOR,
-    Odnoklassniki.DESCRIPTOR,
-    OpenHub.DESCRIPTOR,
-    Osx.DESCRIPTOR,
-    Twitter.DESCRIPTOR,
-    VKontakte.DESCRIPTOR,
-    Webclips.DESCRIPTOR,
-    WindowsMainIcon.DESCRIPTOR,
-    WindowsPhone.DESCRIPTOR,
-    WindowsStore.DESCRIPTOR,
-    WindowsTiles.DESCRIPTOR,
-    WindowsTilesForDesktopApp.DESCRIPTOR,
-    WindowsTilesForPinnedWebsite.DESCRIPTOR,
+  private static final List<Class<Generator>> DEFAULT_GENERATORS = ImmutableList.copyOf([
+    Android1_0,
+    Android1_6,
+    Android4_3,
+    Facebook,
+    Favicon,
+    FreeDesktopGenerator.FreeDesktop,
+    GitHub,
+    GooglePlay,
+    GooglePlus,
+    Gravatar,
+    Ios,
+    Ios6,
+    LaunchPad,
+    Odnoklassniki,
+    OpenHub,
+    Osx,
+    Twitter,
+    VKontakte,
+    Webclips,
+    WindowsMainIcon,
+    WindowsPhone,
+    WindowsStore,
+    WindowsTiles,
+    WindowsTilesForDesktopApp,
+    WindowsTilesForPinnedWebsite,
   ])
 
   /**
@@ -92,19 +73,17 @@ final class LogoGenBasePlugin implements Plugin<Project> {
   void apply(Project project) {
     LogoGeneratorsExtension extension = project.extensions.create(EXTENSION_NAME, LogoGeneratorsExtension)
 
-    this.@generators = project.container(LogoGeneratorDescriptor, (NamedDomainObjectFactory)null)
-
     project.extensions.extraProperties[RtlLogoGenerationMethod.simpleName] = RtlLogoGenerationMethod
+    project.extensions.extraProperties[HebrewLogoGenerationMethod.simpleName] = HebrewLogoGenerationMethod
 
-    generators.configureEach { LogoGeneratorDescriptor descriptor ->
-      if (descriptor.extensionClass != null) {
-        ((ExtensionAware)extension).extensions.create(descriptor.name, descriptor.extensionClass)
+    project.plugins.withType(Generator).each { Generator generator ->
+      if (generator.extensionClass != null) {
+        ((ExtensionAware)extension).extensions.create(generator.name, generator.extensionClass)
       }
 
-      Class<? extends Converter> logoGeneratorClass = descriptor.implementationClass
-      project.extensions.extraProperties[logoGeneratorClass.simpleName] = logoGeneratorClass
+      // TOTHINK
+      // Class<? extends Generator.Converter> converterImplementationClass = generator.converterImplementationClass
+      // project.extensions.extraProperties[converterImplementationClass.simpleName] = converterImplementationClass
     }
-
-    generators.addAll DEFAULT_GENERATORS
   }
 }

@@ -40,11 +40,11 @@ import javax.inject.Inject
  * 1. https://launchpad.net/~<your-organization>/+branding
  */
 @CompileStatic
-final class LaunchPad extends Converter {
+final class LaunchPad extends Generator.Converter {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('launchpad', LaunchPad, 'launchpad', null)
 
   @InheritConstructors
-  protected static class ImageMagickConvertOperation extends Converter.ImageMagickConvertOperation {
+  protected static class ImageMagickConvertOperation extends Generator.Converter.ImageMagickConvertOperation {
     public static final Map<String, Integer> SIZES = ImmutableMap.of(
       'Icon',    14,
       'Logo',    64,

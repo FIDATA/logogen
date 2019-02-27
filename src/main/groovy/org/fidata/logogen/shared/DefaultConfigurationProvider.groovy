@@ -5,10 +5,10 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 
 @CompileStatic
-class LogoConfigurationProvider implements Logo {
+class DefaultConfigurationProvider implements Default {
   final RegularFileProperty srcFile
 
-  LogoConfigurationProvider(ObjectFactory objectFactory) {
+  DefaultConfigurationProvider(ObjectFactory objectFactory) {
     this.@srcFile = objectFactory.fileProperty()
   }
 }

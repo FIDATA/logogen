@@ -20,18 +20,20 @@
 package org.fidata.logogen
 
 import groovy.transform.CompileStatic
-import org.fidata.logogen.generators.Converter
-import org.fidata.logogen.shared.Background
-import org.fidata.logogen.shared.HebrewLogo
+import org.fidata.logogen.generators.Generator
+import org.fidata.logogen.shared.WithBackground
+import org.fidata.logogen.shared.WithHebrew
 import org.fidata.logogen.shared.HebrewLogoGenerationMethod
-import org.fidata.logogen.shared.LogoName
-import org.fidata.logogen.shared.RtlLogo
+import org.fidata.logogen.shared.WithName
+import org.fidata.logogen.shared.WithRtl
 import org.fidata.logogen.shared.RtlLogoGenerationMethod
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
-import org.gradle.api.internal.plugins.DslObject
+import org.gradle.api.file.CopySpec
+import org.gradle.api.file.Directory
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.tasks.bundling.Zip
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 /**
@@ -40,94 +42,91 @@ import org.gradle.language.base.plugins.LifecycleBasePlugin
 @CompileStatic
 final class LogoGenPlugin implements Plugin<Project> {
   /**
-   * Name of logogen root task
-   */
-  public static final String ROOT_TASK_NAME = 'logogen'
-
-  /**
    * Name of logogen extension for {@link Project}
    */
   public static final String EXTENSION_NAME = 'logogen'
+
+  public static final String CONFIGURATION_NAME = 'archives' // TODO / TOTHINK
+
+  public static final String CONVERTED_OUTPUT_DIR_NAME = 'logogen/converted'
+
+  public static final String PACKED_OUTPUT_DIR_NAME = 'logogen/packed'
 
   /**
    * {@inheritDoc}
    */
   @Override
   void apply(Project project) {
-    LogoGenBasePlugin basePlugin = project.plugins.apply(LogoGenBasePlugin)
+    project.plugins.apply LifecycleBasePlugin
+    project.plugins.apply LogoGenBasePlugin
+
+    project.configurations.maybeCreate(CONFIGURATION_NAME)
 
     LogoGenExtension extension = project.extensions.create(EXTENSION_NAME, LogoGenExtension)
     extension.logoName.convention(project.providers.provider {
       project.group.toString()
     })
 
-    TaskProvider<Task> rootTaskProvider = project.tasks.register(ROOT_TASK_NAME)
-    project.plugins.withType(LifecycleBasePlugin) {
-      project.tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME).configure { Task assemble ->
-        assemble.dependsOn rootTaskProvider
-      }
-    }
+    Provider<Directory> convertedOutputDirProvider = project.layout.buildDirectory.dir(CONVERTED_OUTPUT_DIR_NAME)
 
-    basePlugin.generators.configureEach { LogoGeneratorDescriptor descriptor ->
-      TaskProvider<Converter> logoGeneratorProvider = project.tasks.register(descriptor.name, descriptor.implementationClass) { Converter logoGenerator ->
-        logoGenerator.group = LifecycleBasePlugin.BUILD_GROUP
-        logoGenerator.outputDir.set project.layout.buildDirectory.dir(descriptor.name)
-        // Logo
-        logoGenerator.srcFile.convention extension.srcFile
-        if (RtlLogo.isInstance(logoGenerator)) {
-          RtlLogo rtlLogo = (RtlLogo)logoGenerator
-          rtlLogo.rtlSrcFile.convention extension.rtlSrcFile
-          rtlLogo.rtlLogoGenerationMethod.convention project.providers.provider {
-            rtlLogo.rtlSrcFile.present
-              ? RtlLogoGenerationMethod.SEPARATE_SOURCE
-              : extension.rtlLogoGenerationMethod.get() != RtlLogoGenerationMethod.SEPARATE_SOURCE
-              ? extension.rtlLogoGenerationMethod.get()
-              : RtlLogoGenerationMethod.MIRROW
+    Provider<Directory> packedOutputDirProvider = project.layout.buildDirectory.dir(PACKED_OUTPUT_DIR_NAME)
+
+    project.plugins.withType(Generator).each { Generator generator ->
+      TaskProvider<Generator.Converter> converterProvider = null
+      if (generator.converterImplementationClass != null) {
+        converterProvider = project.tasks.register(generator.name, generator.converterImplementationClass) { Generator.Converter converter ->
+          converter.group = LifecycleBasePlugin.BUILD_GROUP
+          converter.outputDir.set project.providers.provider { convertedOutputDirProvider.get().dir(generator.name) }
+
+          // Default
+          converter.srcFile.convention extension.srcFile
+
+          if (WithRtl.isInstance(converter)) {
+            WithRtl converterWithRtl = (WithRtl) converter
+            converterWithRtl.rtlSrcFile.convention extension.rtlSrcFile
+            converterWithRtl.rtlLogoGenerationMethod.convention project.providers.provider {
+              converterWithRtl.rtlSrcFile.present
+                ? RtlLogoGenerationMethod.SEPARATE_SOURCE
+                : extension.rtlLogoGenerationMethod.get() != RtlLogoGenerationMethod.SEPARATE_SOURCE
+                ? extension.rtlLogoGenerationMethod.get()
+                : RtlLogoGenerationMethod.MIRROW
+            }
           }
-        }
-        if (HebrewLogo.isInstance(logoGenerator)) {
-          HebrewLogo hebrewLogo = (HebrewLogo)logoGenerator
-          hebrewLogo.hebrewSrcFile.convention extension.hebrewSrcFile
-          hebrewLogo.hebrewLogoGenerationMethod.convention project.providers.provider {
-            hebrewLogo.hebrewSrcFile.present
-              ? HebrewLogoGenerationMethod.SEPARATE_SOURCE
-              : extension.hebrewLogoGenerationMethod.get() != HebrewLogoGenerationMethod.SEPARATE_SOURCE
+
+          if (WithHebrew.isInstance(converter)) {
+            WithHebrew converterWithHebrew = (WithHebrew) converter
+            converterWithHebrew.hebrewSrcFile.convention extension.hebrewSrcFile
+            converterWithHebrew.hebrewLogoGenerationMethod.convention project.providers.provider {
+              converterWithHebrew.hebrewSrcFile.present
+                ? HebrewLogoGenerationMethod.SEPARATE_SOURCE
+                : extension.hebrewLogoGenerationMethod.get() != HebrewLogoGenerationMethod.SEPARATE_SOURCE
                 ? extension.hebrewLogoGenerationMethod.get()
                 : HebrewLogoGenerationMethod.STANDARD_RTL
+            }
+          }
+
+          if (WithName.isInstance(converter)) {
+            WithName converterWithName = (WithName) converter
+            converterWithName.logoName.convention extension.logoName
+          }
+
+          if (WithBackground.isInstance(converter)) {
+            WithBackground converterWithBackground = (WithBackground) converter
+            converterWithBackground.background.convention extension.background
           }
         }
-        if (LogoName.isInstance(logoGenerator)) {
-          LogoName logoName = (LogoName)logoGenerator
-          logoName.logoName.convention extension.logoName
-        }
-        if (Background.isInstance(logoGenerator)) {
-          Background background = (Background)logoGenerator
-          background.background.convention extension.background
-        }
       }
-      rootTaskProvider.configure { Task rootTask ->
-        rootTask.dependsOn logoGeneratorProvider
-      }
-      /*
-        TODO:
-        1. distributions {
-          // main { contents {
-          // 	from "$buildDir/main"
-          // } }
-          windows_mainicon { contents {
-            from "$buildDir/windows_mainicon"
-          } }
-        2. ArtifactoryPublish & publications
-       */
-      // TODO: webclips ??
-    }
 
-    basePlugin.generators.whenObjectRemoved { LogoGeneratorDescriptor descriptor ->
-      project.tasks.withType(descriptor.implementationClass).named(descriptor.name).configure { Converter logoGenerator ->
-        logoGenerator.enabled = false
+      generator.getOutputs(converterProvider ?: project.providers.provider { extension } /* TODO */).each { String classifier, CopySpec output ->
+        TaskProvider<Zip> packProvider = project.tasks.register("pack${ generator.name.capitalize() }${ classifier?.capitalize() }" /* TODO */, Zip) { Zip pack ->
+          pack.destinationDirectory.set packedOutputDirProvider
+          pack.archiveBaseName.set generator.name
+          pack.archiveClassifier.set classifier
+          pack.with output
+        }
+
+        project.artifacts.add CONFIGURATION_NAME, packProvider // TODO: .get() ?
       }
     }
-
-    new DslObject(project.extensions.getByType(LogoGenExtension)).extensions
   }
 }

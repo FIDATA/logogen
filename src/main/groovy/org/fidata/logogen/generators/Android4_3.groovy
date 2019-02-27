@@ -63,7 +63,7 @@ import java.math.MathContext
  *    https://developer.android.com/guide/practices/ui_guidelines/icon_design_adaptive
  */
 @CompileStatic
-final class Android4_3 extends ConverterWithRtlAndHebrew {
+final class Android4_3 extends Generator.ConverterWithRtlAndHebrew {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android4.3', Android4_3, Classifiers.ANDROID, Android4_3Extension)
 
   protected Android4_3Extension getProjectExtension() {

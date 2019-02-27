@@ -54,14 +54,14 @@ import javax.inject.Inject
  *    https://android-developers.googleblog.com/2013/07/making-beautiful-android-app-icons.html
  */
 @CompileStatic
-final class Android1_0 extends Converter {
+final class Android1_0 extends Generator.Converter {
   public static final LogoGeneratorDescriptor DESCRIPTOR = new LogoGeneratorDescriptor('android1.0', Android1_0, Classifiers.ANDROID, null)
 
   /**
    *
    */
   @InheritConstructors
-  protected static class ImageMagickConvertOperation extends Converter.ImageMagickConvertOperation {
+  protected static class ImageMagickConvertOperation extends Generator.Converter.ImageMagickConvertOperation {
     protected static final BigDecimal SIZE_DP = 48
     protected static final BigDecimal DEF_DENSITY = 160
 

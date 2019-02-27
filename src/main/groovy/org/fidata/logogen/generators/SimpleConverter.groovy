@@ -21,29 +21,29 @@ package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
 import org.fidata.imagemagick.Units
-import org.fidata.logogen.shared.LogoNameConfigurationProvider
+import org.fidata.logogen.shared.NameConfigurationProvider
 import org.gradle.api.tasks.TaskAction
 import org.gradle.workers.WorkerExecutor
 import org.im4java.core.IMOperation
 import javax.inject.Inject
 
 @CompileStatic
-abstract class SimpleConverter extends Converter {
+abstract class SimpleConverter extends Generator.Converter {
   private final WorkerExecutor workerExecutor
   private final int size
   private final String format
   private final Integer density
 
   @Delegate(methodAnnotations = true)
-  private final LogoNameConfigurationProvider logoNameConfigurationProvider
+  private final NameConfigurationProvider logoNameConfigurationProvider
   {
-    logoNameConfigurationProvider = new LogoNameConfigurationProvider(project.objects)
+    logoNameConfigurationProvider = new NameConfigurationProvider(project.objects)
     logoName.convention(project.providers.provider {
       project.group.toString()
     })
   }
 
-  final protected static class ImageMagickResizeAndConvertOperation extends Converter.ImageMagickConvertOperation {
+  final protected static class ImageMagickResizeAndConvertOperation extends Generator.Converter.ImageMagickConvertOperation {
     private final int size
     private final Integer density
     private final File outputFile

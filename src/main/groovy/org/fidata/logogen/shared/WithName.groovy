@@ -5,7 +5,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 
 @CompileStatic
-interface LogoName {
+interface WithName {
   @Input
   Property<String> getLogoName()
 }
