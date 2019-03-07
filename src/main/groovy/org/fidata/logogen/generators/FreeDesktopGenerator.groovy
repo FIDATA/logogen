@@ -71,19 +71,38 @@ class FreeDesktopGenerator extends Generator {
   @Override
   Class<? extends Generator.Converter> getConverterImplementationClass() { Converter }
 
+  private static final File getOutputFile(File outputDir, String logoName, FreeDesktopConfiguration configuration, String sizeDirName, String extension) {
+    new File(outputDir, "$configuration.theme/$sizeDirName/apps/${ logoName }.$extension")
+  }
+
+  static final File getFixedSizeOutputFile(File outputDir, String logoName, FreeDesktopConfiguration configuration, int size) {
+    getOutputFile(outputDir, logoName,  configuration, "${ size }x${ size }", 'png')
+  }
+
+  static final File getScalableOutputFile(File outputDir, String logoName, FreeDesktopConfiguration configuration) {
+    getOutputFile(outputDir, logoName,  configuration, 'scalable', 'svg')
+  }
+
   @Override
-  Map<String, CopySpec> getOutputs(Provider<? extends Default> configuration) {
+  Map<String, List<CopySpec>> getOutputs(File outputDir, String logoName, Provider<? extends Default> configuration) {
     [
-      (null): copySpec {
-        from outputDir
-      },
-      'gnome': copySpec {
+      (null): [copySpec { CopySpec copySpec1 ->
+        copySpec1.from outputDir
+      }],
+      'gnome': { ->
+        List<CopySpec> copySpecs
         ((Provider<FreeDesktopConfiguration>)configuration).get().sizes.each { Integer size ->
-          from
+          copySpecs.add copySpec { CopySpec copySpec ->
+            copySpec.from getFixedSizeOutputFile(outputDir, logoName, (FreeDesktopConfiguration)configuration.get(), size) // TODO
+            copySpec.into file("org/my/App/icons/${ size }x${ size}/apps")
+          }
         }
-        // TODO
-        from outputDir
-      }
+        copySpecs.add copySpec { CopySpec copySpec ->
+          copySpec.from getScalableOutputFile(outputDir, logoName, (FreeDesktopConfiguration)configuration.get()) // TODO
+          copySpec.into file("$group/$appName/icons/scalable/apps")
+        }
+        copySpecs
+      }.call()
     ]
   }
 
@@ -118,6 +137,7 @@ class FreeDesktopGenerator extends Generator {
 
       ImageMagickConvertOperation(File srcFile, boolean debug, File outputDir, String logoName, FreeDesktopConfiguration configuration) {
         super(srcFile, debug, outputDir)
+        this.@logoName = logoName
         this.@configuration = configuration
       }
 
@@ -129,20 +149,16 @@ class FreeDesktopGenerator extends Generator {
           .units(Units.PIXELSPERINCH.toString())
           .density(96)
 
-        File outputSubdir = new File(super.outputDir, configuration.theme)
-
         configuration.sizes.each { Integer size ->
-          File outputFile = new File(outputSubdir, "${ size }x${ size }/apps/${ logoName }.png")
+          File outputFile = getFixedSizeOutputFile(super.outputDir, /*this.*/logoName, configuration, size)
+          assert outputFile.parentFile.mkdirs()
           operation.openOperation()
             .clone(0)
             .resize(size, size)
             .write(outputFile.toString())
+            // TOTEST: delete
           operation.closeOperation()
         }
-
-        operation
-          .write(new File(outputSubdir, "scalable/apps/${ logoName }.svg").toString())
-          // .delete(0)
 
         /* TODO: run svgo
         args = [

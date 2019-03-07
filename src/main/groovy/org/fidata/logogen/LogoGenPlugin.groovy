@@ -123,6 +123,9 @@ final class LogoGenPlugin implements Plugin<Project> {
           pack.archiveBaseName.set generator.name
           pack.archiveClassifier.set classifier
           pack.with output
+          if (converterProvider != null) {
+            pack.dependsOn converterProvider
+          }
         }
 
         project.artifacts.add CONFIGURATION_NAME, packProvider // TODO: .get() ?

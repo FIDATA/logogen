@@ -24,7 +24,6 @@ import groovy.text.Template
 import groovy.text.TemplateEngine
 import groovy.text.XmlTemplateEngine
 import groovy.transform.CompileStatic
-import org.fidata.logogen.LogoGenExtension
 import org.fidata.logogen.LogoGeneratorsExtension
 import org.fidata.logogen.shared.Default
 import org.fidata.logogen.shared.HebrewConfigurationProvider
@@ -74,6 +73,7 @@ abstract class Generator implements Plugin<Project> {
    * are used by the same consumer
    * TODO
    */
+  @SuppressWarnings('GrMethodMayBeStatic')
   String getFamily() { null }
 
   /**
