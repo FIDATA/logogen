@@ -56,7 +56,7 @@ will create a task of this type automatically.
 
 
 ------------------------------------------------------------------------
-Copyright © 2014, 2018-2019  Basil Peace
+Copyright ©  Basil Peace
 
 This is part of Logo Generator.
 

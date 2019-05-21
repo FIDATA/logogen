@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 /*
  * LogoGeneratorsExtension class
- * Copyright © 2019  Basil Peace
+ * Copyright ©  Basil Peace
  *
  * This file is part of Logo Generator.
  *

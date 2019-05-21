@@ -1,7 +1,7 @@
 #!/usr/bin/env groovy
 /*
  * org.fidata.logogen-base Gradle Project plugin
- * Copyright © 2015, 2018-2019  Basil Peace
+ * Copyright ©  Basil Peace
  *
  * This file is part of Logo Generator.
  *
