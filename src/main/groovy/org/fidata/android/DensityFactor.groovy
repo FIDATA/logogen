@@ -1,5 +1,10 @@
+// SPDX-FileCopyrightText: ©  Basil Peace
+// SPDX-License-Identifier: Apache-2.0
 package org.fidata.android
 
+import groovy.transform.CompileStatic
+
+@CompileStatic
 enum DensityFactor {
   LDPI('ldpi', 0.75),
   MDPI('mdpi', 1.0),

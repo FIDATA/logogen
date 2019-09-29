@@ -1,22 +1,5 @@
-#!/usr/bin/env groovy
-/*
- * Generator abstract class
- * Copyright ©  Basil Peace
- *
- * This file is part of Logo Generator.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
+// SPDX-FileCopyrightText: ©  Basil Peace
+// SPDX-License-Identifier: Apache-2.0
 package org.fidata.logogen.generators
 
 import com.google.common.io.Resources
@@ -24,12 +7,12 @@ import groovy.text.Template
 import groovy.text.TemplateEngine
 import groovy.text.XmlTemplateEngine
 import groovy.transform.CompileStatic
-import org.fidata.logogen.LogoGeneratorsExtension
+import org.fidata.logogen.annotations.DelegateWithGradleAnnotations
 import org.fidata.logogen.shared.Default
-import org.fidata.logogen.shared.HebrewConfigurationProvider
+import org.fidata.logogen.shared.HebrewConfigurationProperty
 import org.fidata.logogen.shared.HebrewLogoGenerationMethod
-import org.fidata.logogen.shared.DefaultConfigurationProvider
-import org.fidata.logogen.shared.RtlConfigurationProvider
+import org.fidata.logogen.shared.DefaultConfigurationProperty
+import org.fidata.logogen.shared.RtlConfigurationProperty
 import org.fidata.logogen.shared.RtlLogoGenerationMethod
 import org.gradle.api.Action
 import org.gradle.api.DefaultTask
@@ -38,7 +21,6 @@ import org.gradle.api.Project
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.LogLevel
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.OutputDirectory
@@ -52,6 +34,7 @@ import javax.inject.Inject
 /**
  * Logo Generator
  */
+@CompileStatic
 abstract class Generator implements Plugin<Project> {
   private Project project
 
@@ -63,6 +46,7 @@ abstract class Generator implements Plugin<Project> {
   /**
    * Name of generator. It's used as names of a task and output directory.
    * It is recommended to use {@code camelCase} for the name
+   * TOTHINK: better use name separated with dots or dashes, so we could use the same name for plugin id
    */
   abstract String getName()
 
@@ -78,9 +62,9 @@ abstract class Generator implements Plugin<Project> {
 
   /**
    * Class implementing generator's converter.
-   * Generator should have single converter
+   * Generator should have at most one converter
    */
-  abstract Class<? extends Converter> getConverterImplementationClass()
+  abstract Class<? extends AbstractConverter> getConverterImplClass()
 
   protected final CopySpec copySpec(@DelegatesTo(CopySpec) Closure closure) {
     project.copySpec closure
@@ -110,13 +94,11 @@ abstract class Generator implements Plugin<Project> {
    */
   @CacheableTask
   @CompileStatic
-  abstract static class Converter extends DefaultTask /*implements Default TODO*/ {
-    protected <T> T getProjectExtension(Class<T> extensionClass) {
-      ((ExtensionAware)project.extensions.findByType(LogoGeneratorsExtension)).extensions.getByType(extensionClass)
-    }
-  
-    @Delegate(methodAnnotations = true)
-    private final DefaultConfigurationProvider defaultConfigurationProvider = new DefaultConfigurationProvider(project.objects)
+  abstract private static class AbstractConverter<Extension> extends DefaultTask implements Default {
+    abstract void convention(Extension extension)
+
+    @DelegateWithGradleAnnotations
+    private final DefaultConfigurationProperty defaultConfigurationProvider = new DefaultConfigurationProperty(project.objects, project.providers)
   
     /**
      * Output directory
@@ -169,7 +151,7 @@ abstract class Generator implements Plugin<Project> {
        */
       protected abstract IMOperation getOperation()
     }
-  
+
     /**
      * Generation of XML file from existing template.
      * Template should be placed in resources, and implementation
@@ -187,10 +169,14 @@ abstract class Generator implements Plugin<Project> {
       }
   
       @Override
-      void run() {
+      final void run() {
         outputFile.text = template.make(bindings)
       }
-  
+
+      /**
+       * Map of template variable bindings
+       * @return
+       */
       abstract protected Map getBindings()
     }
   
@@ -209,7 +195,7 @@ abstract class Generator implements Plugin<Project> {
      * @param actionClass Actual operation class extending {@link ImageMagickConvertOperation}
      * @param params Params to pass to {@code actionClass} constructor
      */
-    protected void imageMagicConvert(WorkerExecutor workerExecutor, Class<? extends ImageMagickConvertOperation> actionClass, Object... params) {
+    protected void imageMagickConvert(WorkerExecutor workerExecutor, Class<? extends ImageMagickConvertOperation> actionClass, Object... params) {
       workerExecutor.submit(actionClass, new Action<WorkerConfiguration>() {
         @Override
         void execute(WorkerConfiguration workerConfiguration) {
@@ -228,7 +214,7 @@ abstract class Generator implements Plugin<Project> {
      * @param actionClass Actual operation class extending {@link GenerateXmlOperation}
      * @param params Params to pass to {@code actionClass} constructor
      */
-    protected void generateXml(WorkerExecutor workerExecutor, Class<? extends GenerateXmlOperation> actionClass, Object... params) {
+    protected final void generateXml(WorkerExecutor workerExecutor, Class<? extends GenerateXmlOperation> actionClass, Object... params) {
       workerExecutor.submit(actionClass, new Action<WorkerConfiguration>() {
         @Override
         void execute(WorkerConfiguration workerConfiguration) {
@@ -247,15 +233,25 @@ abstract class Generator implements Plugin<Project> {
     }
   }
 
+  abstract static class Converter<Extension> extends AbstractConverter<Extension> {
+    /**
+     * @inheritDocs
+     */
+    @Override
+    protected final void imageMagickConvert(WorkerExecutor workerExecutor, Class<? extends ImageMagickConvertOperation> actionClass, Object... params) {
+      super.imageMagickConvert workerExecutor, actionClass, params
+    }
+  }
+
   /**
    * Logo Generator that is able to generate a separate icon for RTL locale
    */
   @CompileStatic
-  abstract static class ConverterWithRtl extends Generator.Converter {
-    @Delegate(methodAnnotations = true)
-    private final RtlConfigurationProvider rtlLogoConfigurationProvider
+  abstract private static class AbstractConverterWithRtl<Extension> extends AbstractConverter<Extension> {
+    @DelegateWithGradleAnnotations
+    private final RtlConfigurationProperty rtlLogoConfigurationProvider
     {
-      rtlLogoConfigurationProvider = new RtlConfigurationProvider(project.objects)
+      rtlLogoConfigurationProvider = new RtlConfigurationProperty(project.objects, project.providers)
       rtlLogoGenerationMethod.convention project.providers.provider {
         rtlSrcFile.present ? RtlLogoGenerationMethod.SEPARATE_SOURCE : RtlLogoGenerationMethod.MIRROW
       }
@@ -269,7 +265,7 @@ abstract class Generator implements Plugin<Project> {
      * as first five arguments and pass them to {@code super} constructor.
      * All other arguments may be placed after these five.</b>
      */
-    abstract protected static class ImageMagickConvertOperation extends Generator.Converter.ImageMagickConvertOperation {
+    abstract protected static class ImageMagickConvertOperation extends AbstractConverter.ImageMagickConvertOperation {
       private File rtlSrcFile
       private RtlLogoGenerationMethod rtlLogoGenerationMethod
 
@@ -284,13 +280,23 @@ abstract class Generator implements Plugin<Project> {
     /**
      * @inheritDocs
      */
-    @Override
-    protected void imageMagicConvert(WorkerExecutor workerExecutor, Class<? extends ImageMagickConvertOperation> actionClass, Object... params) {
+
+    protected void imageMagickConvert(WorkerExecutor workerExecutor, Class<? extends ImageMagickConvertOperation> actionClass, Object... params) {
       Object[] newParams = new Object[params.length + 2]
-      newParams[0] = rtlSrcFile.getOrNull()
+      newParams[0] = rtlSrcFile.orNull
       newParams[1] = rtlLogoGenerationMethod.get()
       System.arraycopy(params, 0, newParams, 2, params.length)
-      super.imageMagicConvert(workerExecutor, actionClass, newParams)
+      super.imageMagickConvert(workerExecutor, actionClass, newParams)
+    }
+  }
+
+  abstract static class ConverterWithRtl<Extension> extends AbstractConverterWithRtl<Extension> {
+    /**
+     * @inheritDocs
+     */
+    @Override
+    protected final void imageMagickConvert(WorkerExecutor workerExecutor, Class<? extends ImageMagickConvertOperation> actionClass, Object... params) {
+      super.imageMagickConvert workerExecutor, actionClass, params
     }
   }
 
@@ -298,11 +304,11 @@ abstract class Generator implements Plugin<Project> {
    * Logo Generator that is able to generate a separate icons for RTL and Hebrew locales
    */
   @CompileStatic
-  abstract static class ConverterWithRtlAndHebrew extends ConverterWithRtl {
-    @Delegate(methodAnnotations = true)
-    private final HebrewConfigurationProvider hebrewLogoConfigurationProvider
+  abstract private static class AbstractConverterWithRtlAndHebrew<Extension> extends AbstractConverterWithRtl<Extension> {
+    @DelegateWithGradleAnnotations
+    private final HebrewConfigurationProperty hebrewLogoConfigurationProvider
     {
-      hebrewLogoConfigurationProvider = new HebrewConfigurationProvider(project.objects)
+      hebrewLogoConfigurationProvider = new HebrewConfigurationProperty(project.objects, project.providers)
       hebrewLogoGenerationMethod.convention project.providers.provider {
         hebrewSrcFile.present ? HebrewLogoGenerationMethod.SEPARATE_SOURCE : HebrewLogoGenerationMethod.STANDARD_RTL
       }
@@ -317,7 +323,7 @@ abstract class Generator implements Plugin<Project> {
      * as first seven arguments and pass them to {@code super} constructor.
      * All other arguments may be placed after these seven.</b>
      */
-    abstract protected static class ImageMagickConvertOperation extends ConverterWithRtl.ImageMagickConvertOperation {
+    abstract protected static class ImageMagickConvertOperation extends AbstractConverterWithRtl.ImageMagickConvertOperation {
       private File hebrewSrcFile
       private HebrewLogoGenerationMethod hebrewLogoGenerationMethod
 
@@ -329,16 +335,26 @@ abstract class Generator implements Plugin<Project> {
       }
     }
 
+    // TOTEST
+    /**
+     * @inheritDocs
+     */
+    protected void imageMagickConvert(WorkerExecutor workerExecutor, Class<? extends ImageMagickConvertOperation> actionClass, Object... params) {
+      Object[] newParams = new Object[params.length + 2]
+      newParams[0] = hebrewSrcFile.orNull
+      newParams[1] = hebrewLogoGenerationMethod.get()
+      System.arraycopy(params, 0, newParams, 2, params.length)
+      super.imageMagickConvert(workerExecutor, actionClass, newParams)
+    }
+  }
+
+  abstract static class ConverterWithRtlAndHebrew<Extension> extends AbstractConverterWithRtlAndHebrew<Extension> {
     /**
      * @inheritDocs
      */
     @Override
-    protected void imageMagicConvert(WorkerExecutor workerExecutor, Class<? extends ImageMagickConvertOperation> actionClass, Object... params) {
-      Object[] newParams = new Object[params.length + 2]
-      newParams[0] = hebrewSrcFile.getOrNull()
-      newParams[1] = hebrewLogoGenerationMethod.get()
-      System.arraycopy(params, 0, newParams, 2, params.length)
-      super.imageMagicConvert(workerExecutor, actionClass, newParams)
+    protected final void imageMagickConvert(WorkerExecutor workerExecutor, Class<? extends ImageMagickConvertOperation> actionClass, Object... params) {
+      super.imageMagickConvert workerExecutor, actionClass, params
     }
   }
 }

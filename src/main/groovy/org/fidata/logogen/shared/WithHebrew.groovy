@@ -1,14 +1,17 @@
+// SPDX-FileCopyrightText: ©  Basil Peace
+// SPDX-License-Identifier: Apache-2.0
 package org.fidata.logogen.shared
 
 import groovy.transform.CompileStatic
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 
 @CompileStatic
-interface WithHebrew {
+interface WithHebrew extends WithRtl, Provider<HebrewConfiguration> {
   /**
    * Source file for Hebrew locale, in SVG format.
    * Provided as separate since Hebrew has different rules

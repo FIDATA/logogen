@@ -1,22 +1,5 @@
-#!/usr/bin/env groovy
-/*
- * org.fidata.logogen Gradle Project plugin
- * Copyright ©  Basil Peace
- *
- * This file is part of Logo Generator.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
+// SPDX-FileCopyrightText: ©  Basil Peace
+// SPDX-License-Identifier: Apache-2.0
 package org.fidata.logogen
 
 import groovy.transform.CompileStatic
@@ -72,9 +55,9 @@ final class LogoGenPlugin implements Plugin<Project> {
     Provider<Directory> packedOutputDirProvider = project.layout.buildDirectory.dir(PACKED_OUTPUT_DIR_NAME)
 
     project.plugins.withType(Generator).each { Generator generator ->
-      TaskProvider<Generator.Converter> converterProvider = null
-      if (generator.converterImplementationClass != null) {
-        converterProvider = project.tasks.register(generator.name, generator.converterImplementationClass) { Generator.Converter converter ->
+      TaskProvider<Generator.AbstractConverter> converterProvider = null
+      if (generator.converterImplClass != null) {
+        converterProvider = project.tasks.register(generator.name, generator.converterImplClass) { Generator.AbstractConverter converter ->
           converter.group = LifecycleBasePlugin.BUILD_GROUP
           converter.outputDir.set project.providers.provider { convertedOutputDirProvider.get().dir(generator.name) }
 
@@ -87,9 +70,9 @@ final class LogoGenPlugin implements Plugin<Project> {
             converterWithRtl.rtlLogoGenerationMethod.convention project.providers.provider {
               converterWithRtl.rtlSrcFile.present
                 ? RtlLogoGenerationMethod.SEPARATE_SOURCE
-                : extension.rtlLogoGenerationMethod.get() != RtlLogoGenerationMethod.SEPARATE_SOURCE
+                : (extension.rtlLogoGenerationMethod.get() != RtlLogoGenerationMethod.SEPARATE_SOURCE
                 ? extension.rtlLogoGenerationMethod.get()
-                : RtlLogoGenerationMethod.MIRROW
+                : RtlLogoGenerationMethod.MIRROW)
             }
           }
 

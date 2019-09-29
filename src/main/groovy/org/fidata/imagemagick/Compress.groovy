@@ -1,5 +1,10 @@
+// SPDX-FileCopyrightText: ©  Basil Peace
+// SPDX-License-Identifier: Apache-2.0
 package org.fidata.imagemagick
 
+import groovy.transform.CompileStatic
+
+@CompileStatic
 enum Compress {
   NONE('None'),
   BZIP('BZip'),
@@ -25,5 +30,4 @@ enum Compress {
   String toString() {
     name
   }
-
 }

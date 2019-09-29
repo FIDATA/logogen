@@ -1,3 +1,7 @@
+<!--
+SPDX-FileCopyrightText: ©  Basil Peace
+SPDX-License-Identifier: FSFAP
+-->
 Logo Generator
 ==============
 
@@ -53,14 +57,3 @@ class.
 Custom generator could be registered in `LogoGenBasePlugin.generators`
 collection, then the plugin
 will create a task of this type automatically.
-
-
-------------------------------------------------------------------------
-Copyright ©  Basil Peace
-
-This is part of Logo Generator.
-
-Copying and distribution of this file, with or without modification,
-are permitted in any medium without royalty provided the copyright
-notice and this notice are preserved.  This file is offered as-is,
-without any warranty.

@@ -1,27 +1,35 @@
-#!/usr/bin/env groovy
-/*
- * org.fidata.logogen-base Gradle Project plugin
- * Copyright ©  Basil Peace
- *
- * This file is part of Logo Generator.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
- * implied. See the License for the specific language governing
- * permissions and limitations under the License.
- */
+// SPDX-FileCopyrightText: ©  Basil Peace
+// SPDX-License-Identifier: Apache-2.0
 package org.fidata.logogen
 
 import com.google.common.collect.ImmutableList
 import groovy.transform.CompileStatic
-import org.fidata.logogen.generators.*
+import org.fidata.logogen.generators.drafts.Android1_0
+import org.fidata.logogen.generators.drafts.Android1_6
+import org.fidata.logogen.generators.drafts.Android4_3
+import org.fidata.logogen.generators.drafts.Facebook
+import org.fidata.logogen.generators.drafts.Favicon
+import org.fidata.logogen.generators.drafts.FreeDesktopGenerator
+import org.fidata.logogen.generators.Generator
+import org.fidata.logogen.generators.drafts.GitHub
+import org.fidata.logogen.generators.drafts.GooglePlay
+import org.fidata.logogen.generators.drafts.GooglePlus
+import org.fidata.logogen.generators.drafts.Gravatar
+import org.fidata.logogen.generators.drafts.Ios
+import org.fidata.logogen.generators.drafts.Ios6
+import org.fidata.logogen.generators.drafts.LaunchPad
+import org.fidata.logogen.generators.drafts.Odnoklassniki
+import org.fidata.logogen.generators.drafts.OpenHub
+import org.fidata.logogen.generators.drafts.Osx
+import org.fidata.logogen.generators.drafts.Twitter
+import org.fidata.logogen.generators.drafts.VKontakte
+import org.fidata.logogen.generators.drafts.Webclips
+import org.fidata.logogen.generators.drafts.WindowsMainIcon
+import org.fidata.logogen.generators.drafts.WindowsPhone
+import org.fidata.logogen.generators.drafts.WindowsStore
+import org.fidata.logogen.generators.drafts.WindowsTiles
+import org.fidata.logogen.generators.drafts.WindowsTilesForDesktopApp
+import org.fidata.logogen.generators.drafts.WindowsTilesForPinnedWebsite
 import org.fidata.logogen.shared.HebrewLogoGenerationMethod
 import org.fidata.logogen.shared.RtlLogoGenerationMethod
 import org.gradle.api.Plugin
@@ -78,7 +86,8 @@ final class LogoGenBasePlugin implements Plugin<Project> {
 
     project.plugins.withType(Generator).each { Generator generator ->
       if (generator.extensionClass != null) {
-        ((ExtensionAware)extension).extensions.create(generator.name, generator.extensionClass)
+        Object extension = ((ExtensionAware)extension).extensions.create(generator.name, generator.extensionClass)
+        generator.convention extension
       }
 
       // TOTHINK
