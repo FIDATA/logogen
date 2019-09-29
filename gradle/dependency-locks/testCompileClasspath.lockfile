@@ -7,6 +7,7 @@ com.google.guava:failureaccess:1.0
 com.google.guava:guava:27.0-jre
 com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
 com.google.j2objc:j2objc-annotations:1.1
+com.ibm.icu:icu4j:63.1
 commons-io:commons-io:2.6
 junit:junit:4.12
 org.checkerframework:checker-qual:2.5.2

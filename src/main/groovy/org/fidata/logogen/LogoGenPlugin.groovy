@@ -3,20 +3,10 @@
 package org.fidata.logogen
 
 import groovy.transform.CompileStatic
-import org.fidata.logogen.generators.Generator
-import org.fidata.logogen.shared.WithBackground
-import org.fidata.logogen.shared.WithHebrew
-import org.fidata.logogen.shared.HebrewLogoGenerationMethod
-import org.fidata.logogen.shared.WithName
-import org.fidata.logogen.shared.WithRtl
-import org.fidata.logogen.shared.RtlLogoGenerationMethod
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.CopySpec
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.TaskProvider
-import org.gradle.api.tasks.bundling.Zip
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 /**
@@ -54,7 +44,7 @@ final class LogoGenPlugin implements Plugin<Project> {
 
     Provider<Directory> packedOutputDirProvider = project.layout.buildDirectory.dir(PACKED_OUTPUT_DIR_NAME)
 
-    project.plugins.withType(Generator).each { Generator generator ->
+    /*project.plugins.withType(Generator).each { Generator generator ->
       TaskProvider<Generator.AbstractConverter> converterProvider = null
       if (generator.converterImplClass != null) {
         converterProvider = project.tasks.register(generator.name, generator.converterImplClass) { Generator.AbstractConverter converter ->
@@ -98,21 +88,21 @@ final class LogoGenPlugin implements Plugin<Project> {
             converterWithBackground.background.convention extension.background
           }
         }
-      }
+      }*/
 
-      generator.getOutputs(converterProvider ?: project.providers.provider { extension } /* TODO */).each { String classifier, CopySpec output ->
-        TaskProvider<Zip> packProvider = project.tasks.register("pack${ generator.name.capitalize() }${ classifier?.capitalize() }" /* TODO */, Zip) { Zip pack ->
-          pack.destinationDirectory.set packedOutputDirProvider
-          pack.archiveBaseName.set generator.name
-          pack.archiveClassifier.set classifier
-          pack.with output
-          if (converterProvider != null) {
-            pack.dependsOn converterProvider
-          }
-        }
-
-        project.artifacts.add CONFIGURATION_NAME, packProvider // TODO: .get() ?
-      }
-    }
+//      generator.getOutputs(converterProvider ?: project.providers.provider { extension } /* TODO */).each { String classifier, CopySpec output ->
+//        TaskProvider<Zip> packProvider = project.tasks.register("pack${ generator.name.capitalize() }${ classifier?.capitalize() }" /* TODO */, Zip) { Zip pack ->
+//          pack.destinationDirectory.set packedOutputDirProvider
+//          pack.archiveBaseName.set generator.name
+//          pack.archiveClassifier.set classifier
+//          pack.with output
+//          if (converterProvider != null) {
+//            pack.dependsOn converterProvider
+//          }
+//        }
+//
+//        project.artifacts.add CONFIGURATION_NAME, packProvider // TODO: .get() ?
+//      }
+//    }
   }
 }

@@ -4,6 +4,7 @@ package org.fidata.logogen
 
 import groovy.transform.CompileStatic
 import org.gradle.api.Project
+import org.gradle.api.plugins.ExtensionAware
 
 /**
  * logoGenerators extension for {@link Project}.
@@ -11,5 +12,5 @@ import org.gradle.api.Project
  * Added by {@code logogen-base} plugin
  */
 @CompileStatic
-final class LogoGeneratorsExtension /*implements ExtensionAware*/ {
+abstract class LogoGeneratorsExtension implements ExtensionAware {
 }

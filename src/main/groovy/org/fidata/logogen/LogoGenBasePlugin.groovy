@@ -4,14 +4,14 @@ package org.fidata.logogen
 
 import com.google.common.collect.ImmutableList
 import groovy.transform.CompileStatic
-import org.fidata.logogen.generators.drafts.Android1_0
+/*import org.fidata.logogen.generators.drafts.Android1_0
 import org.fidata.logogen.generators.drafts.Android1_6
 import org.fidata.logogen.generators.drafts.Android4_3
 import org.fidata.logogen.generators.drafts.Facebook
 import org.fidata.logogen.generators.drafts.Favicon
-import org.fidata.logogen.generators.drafts.FreeDesktopGenerator
+import org.fidata.logogen.generators.drafts.FreeDesktopGenerator*/
 import org.fidata.logogen.generators.Generator
-import org.fidata.logogen.generators.drafts.GitHub
+/*import org.fidata.logogen.generators.drafts.GitHub
 import org.fidata.logogen.generators.drafts.GooglePlay
 import org.fidata.logogen.generators.drafts.GooglePlus
 import org.fidata.logogen.generators.drafts.Gravatar
@@ -29,9 +29,9 @@ import org.fidata.logogen.generators.drafts.WindowsPhone
 import org.fidata.logogen.generators.drafts.WindowsStore
 import org.fidata.logogen.generators.drafts.WindowsTiles
 import org.fidata.logogen.generators.drafts.WindowsTilesForDesktopApp
-import org.fidata.logogen.generators.drafts.WindowsTilesForPinnedWebsite
-import org.fidata.logogen.shared.HebrewLogoGenerationMethod
-import org.fidata.logogen.shared.RtlLogoGenerationMethod
+import org.fidata.logogen.generators.drafts.WindowsTilesForPinnedWebsite*/
+import org.fidata.logogen.shared.enums.HebrewLogoGenerationMethod
+import org.fidata.logogen.shared.enums.RtlLogoGenerationMethod
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
@@ -47,7 +47,7 @@ final class LogoGenBasePlugin implements Plugin<Project> {
   public static final String EXTENSION_NAME = 'logoGenerators'
 
   private static final List<Class<Generator>> DEFAULT_GENERATORS = ImmutableList.copyOf([
-    Android1_0,
+    /*Android1_0,
     Android1_6,
     Android4_3,
     Facebook,
@@ -71,7 +71,7 @@ final class LogoGenBasePlugin implements Plugin<Project> {
     WindowsStore,
     WindowsTiles,
     WindowsTilesForDesktopApp,
-    WindowsTilesForPinnedWebsite,
+    WindowsTilesForPinnedWebsite,*/
   ])
 
   /**
@@ -86,8 +86,8 @@ final class LogoGenBasePlugin implements Plugin<Project> {
 
     project.plugins.withType(Generator).each { Generator generator ->
       if (generator.extensionClass != null) {
-        Object extension = ((ExtensionAware)extension).extensions.create(generator.name, generator.extensionClass)
-        generator.convention extension
+        /*Object generatorExtension =*/ extension.extensions.create(generator.name, generator.extensionClass)
+        // TODO generator.convention extension
       }
 
       // TOTHINK
