@@ -27,10 +27,6 @@ import org.gradle.api.provider.ProviderFactory
 @CompileStatic
 final class LogoGenExtension {
   @Delegate
-  private final ConfigurableDefault defaultProvider
-  @Delegate
-  private final ConfigurableRtl rtlProvider
-  @Delegate
   private final ConfigurableHebrew hebrewProvider
   @Delegate
   private final ConfigurableBackground backgroundProvider
@@ -45,12 +41,11 @@ final class LogoGenExtension {
    */
   @Inject
   protected LogoGenExtension(ProviderFactory providerFactory, ObjectFactory objectFactory, ProjectLayout projectLayout) {
-    this.@defaultProvider = new DefaultPropertyImpl(objectFactory, providerFactory, projectLayout)
-    this.@rtlProvider = new RtlPropertyImpl(objectFactory, providerFactory, projectLayout)
-    this.@hebrewProvider = new HebrewPropertyImpl(objectFactory, providerFactory, projectLayout)
-    this.@backgroundProvider = new BackgroundPropertyImpl(objectFactory, providerFactory)
-    this.@nameProvider = new NamePropertyImpl(objectFactory, providerFactory)
+    this.@hebrewProvider = new HebrewPropertyImpl(providerFactory, objectFactory, projectLayout)
+    this.@backgroundProvider = new BackgroundPropertyImpl(providerFactory, objectFactory)
+    this.@nameProvider = new NamePropertyImpl(providerFactory, objectFactory)
 
+    // TODO: the same code should be for separate generator extensions
     rtlLogoGenerationMethod.convention providerFactory.provider {
       rtlSrcFile.present ? RtlLogoGenerationMethod.SEPARATE_SOURCE : RtlLogoGenerationMethod.MIRROW
     }

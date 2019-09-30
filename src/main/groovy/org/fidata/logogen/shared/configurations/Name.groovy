@@ -3,6 +3,6 @@ package org.fidata.logogen.shared.configurations
 import groovy.transform.CompileStatic
 
 @CompileStatic
-interface Name extends Serializable {
+interface Name {
   String getLogoName()
 }

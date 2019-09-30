@@ -11,7 +11,7 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 
 @CompileStatic
-interface ConfigurableHebrew {
+interface ConfigurableHebrew extends ConfigurableRtl {
   /**
    * Source file for Hebrew locale, in SVG format.
    * Provided as separate since Hebrew has different rules

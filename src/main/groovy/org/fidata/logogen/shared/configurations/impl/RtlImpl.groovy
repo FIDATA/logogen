@@ -4,20 +4,27 @@ import groovy.transform.CompileStatic
 import groovy.transform.Immutable
 import org.fidata.logogen.shared.configurations.Rtl
 import org.fidata.logogen.shared.enums.RtlLogoGenerationMethod
+import org.fidata.utils.ImmutableWithCustomConstructors
 
-@Immutable(knownImmutableClasses = [File])
+@ImmutableWithCustomConstructors(knownImmutableClasses = [File])
 @CompileStatic
 final class RtlImpl implements Rtl {
+  @Delegate
+  private final DefaultImpl aDefault
+
   /**
-   * Source file for RTL locales, in SVG format
+   * {@inheritDoc}
    */
   final File rtlSrcFile
 
   /**
-   * Method of creation of RTL icon.
-   * By default it is {@link RtlLogoGenerationMethod#SEPARATE_SOURCE}
-   * if {@link #rtlSrcFile} is set
-   * and {@link RtlLogoGenerationMethod#MIRROW} otherwise
+   * {@inheritDoc}
    */
   final RtlLogoGenerationMethod rtlLogoGenerationMethod
+
+  RtlImpl(File srcFile, File rtlSrcFile, RtlLogoGenerationMethod rtlLogoGenerationMethod) {
+    this.@aDefault = new DefaultImpl(srcFile)
+    this.@rtlSrcFile = rtlSrcFile
+    this.@rtlLogoGenerationMethod = rtlLogoGenerationMethod
+  }
 }

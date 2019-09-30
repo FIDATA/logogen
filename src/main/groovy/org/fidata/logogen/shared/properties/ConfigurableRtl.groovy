@@ -11,7 +11,7 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 
 @CompileStatic
-interface ConfigurableRtl {
+interface ConfigurableRtl extends ConfigurableDefault {
   /**
    * Source file for RTL locales, in SVG format
    */

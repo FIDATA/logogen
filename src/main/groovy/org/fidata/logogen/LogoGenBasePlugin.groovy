@@ -10,7 +10,6 @@ import org.fidata.logogen.generators.drafts.Android4_3
 import org.fidata.logogen.generators.drafts.Facebook
 import org.fidata.logogen.generators.drafts.Favicon
 import org.fidata.logogen.generators.drafts.FreeDesktopGenerator*/
-import org.fidata.logogen.generators.Generator
 /*import org.fidata.logogen.generators.drafts.GitHub
 import org.fidata.logogen.generators.drafts.GooglePlay
 import org.fidata.logogen.generators.drafts.GooglePlus
@@ -34,7 +33,6 @@ import org.fidata.logogen.shared.enums.HebrewLogoGenerationMethod
 import org.fidata.logogen.shared.enums.RtlLogoGenerationMethod
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.ExtensionAware
 
 /**
  * org.fidata.logogen-base Gradle Project plugin
@@ -46,7 +44,7 @@ final class LogoGenBasePlugin implements Plugin<Project> {
    */
   public static final String EXTENSION_NAME = 'logoGenerators'
 
-  private static final List<Class<Generator>> DEFAULT_GENERATORS = ImmutableList.copyOf([
+  private static final List<Class<AbstractGenerator>> DEFAULT_GENERATORS = ImmutableList.copyOf([
     /*Android1_0,
     Android1_6,
     Android4_3,
@@ -84,15 +82,14 @@ final class LogoGenBasePlugin implements Plugin<Project> {
     project.extensions.extraProperties[RtlLogoGenerationMethod.simpleName] = RtlLogoGenerationMethod
     project.extensions.extraProperties[HebrewLogoGenerationMethod.simpleName] = HebrewLogoGenerationMethod
 
-    project.plugins.withType(Generator).each { Generator generator ->
+    project.plugins.withType(AbstractGenerator).each { AbstractGenerator generator ->
       if (generator.extensionClass != null) {
         /*Object generatorExtension =*/ extension.extensions.create(generator.name, generator.extensionClass)
         // TODO generator.convention extension
       }
 
-      // TOTHINK
-      // Class<? extends Generator.Converter> converterImplementationClass = generator.converterImplementationClass
-      // project.extensions.extraProperties[converterImplementationClass.simpleName] = converterImplementationClass
+      Class<? extends AbstractGenerator.AbstractGeneratorTask> converterImplClass = generator.converterImplClass
+      project.extensions.extraProperties[converterImplClass.simpleName] = converterImplClass
     }
   }
 }

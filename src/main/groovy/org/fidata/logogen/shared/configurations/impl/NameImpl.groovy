@@ -7,5 +7,8 @@ import org.fidata.logogen.shared.configurations.Name
 @Immutable
 @CompileStatic
 final class NameImpl implements Name {
+  /**
+   * {@inheritDoc}
+   */
   final String logoName
 }

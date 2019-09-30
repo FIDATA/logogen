@@ -4,7 +4,7 @@ import groovy.transform.CompileStatic
 import java.awt.Color
 
 @CompileStatic
-interface Background extends Serializable {
+interface Background {
   /**
    * Background color.
    * It is used by generators that require opaque background

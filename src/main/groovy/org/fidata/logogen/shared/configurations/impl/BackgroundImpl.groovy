@@ -9,8 +9,7 @@ import org.fidata.logogen.shared.configurations.Background
 @CompileStatic
 final class BackgroundImpl implements Background {
   /**
-   * Background color.
-   * It is used by generators that require opaque background
+   * {@inheritDoc}
    */
   final Color background
 }

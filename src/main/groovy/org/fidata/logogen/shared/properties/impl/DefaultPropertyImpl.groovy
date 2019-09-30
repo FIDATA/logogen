@@ -7,7 +7,8 @@ import javax.annotation.Nullable
 import javax.inject.Inject
 import org.fidata.logogen.shared.configurations.Default
 import org.fidata.logogen.shared.configurations.impl.DefaultImpl
-import org.fidata.logogen.shared.providers.DefaultProvider
+import org.fidata.logogen.shared.properties.ConfigurableDefault
+import org.fidata.utils.ImmutableWithCustomConstructors
 import org.gradle.api.Transformer
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
@@ -16,14 +17,19 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 
+@ImmutableWithCustomConstructors
 @CompileStatic
-final class DefaultPropertyImpl implements DefaultProvider, Property<Default> {
-  protected final ProjectLayout projectLayout
-  protected final ProviderFactory providerFactory
+final class DefaultPropertyImpl implements ConfigurableDefault, Property<Default> {
+  final ProjectLayout projectLayout
+  final ProviderFactory providerFactory
+
   final RegularFileProperty srcFile
 
+  @Delegate
+  private final Provider<Default> provider
+
   @Inject
-  DefaultPropertyImpl(ObjectFactory objectFactory, ProviderFactory providerFactory, ProjectLayout projectLayout) {
+  DefaultPropertyImpl(ProviderFactory providerFactory, ObjectFactory objectFactory, ProjectLayout projectLayout) {
     this.@srcFile = objectFactory.fileProperty()
     this.@providerFactory = providerFactory
     this.@projectLayout = projectLayout
@@ -31,9 +37,6 @@ final class DefaultPropertyImpl implements DefaultProvider, Property<Default> {
       (Default)new DefaultImpl(srcFile.get().asFile)
     }
   }
-
-  @Delegate
-  private final Provider<Default> provider
 
   private static final Transformer<File, Default> SRC_FILE_TRANSFORMER = new Transformer<File, Default>() {
     @Override

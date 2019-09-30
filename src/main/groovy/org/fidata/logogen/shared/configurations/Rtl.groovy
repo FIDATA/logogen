@@ -4,7 +4,7 @@ import groovy.transform.CompileStatic
 import org.fidata.logogen.shared.enums.RtlLogoGenerationMethod
 
 @CompileStatic
-interface Rtl extends Serializable {
+interface Rtl extends Default {
   /**
    * Source file for RTL locales, in SVG format
    */

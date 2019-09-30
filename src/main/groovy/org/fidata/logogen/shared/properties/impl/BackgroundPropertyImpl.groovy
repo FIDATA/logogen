@@ -8,16 +8,17 @@ import javax.annotation.Nullable
 import javax.inject.Inject
 import org.fidata.logogen.shared.configurations.Background
 import org.fidata.logogen.shared.configurations.impl.BackgroundImpl
-import org.fidata.logogen.shared.providers.BackgroundProvider
+import org.fidata.logogen.shared.properties.ConfigurableBackground
+import org.fidata.utils.ImmutableWithCustomConstructors
 import org.gradle.api.Transformer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 
+@ImmutableWithCustomConstructors
 @CompileStatic
-final class BackgroundPropertyImpl implements BackgroundProvider, Property<Background> {
-  final ProviderFactory providerFactory
+final class BackgroundPropertyImpl implements ConfigurableBackground, Property<Background> {
   final Property<Color> background
 
   /**
@@ -31,17 +32,16 @@ final class BackgroundPropertyImpl implements BackgroundProvider, Property<Backg
     this.@background.set Color.decode(background)
   }
 
+  @Delegate
+  private final Provider<Background> provider
+
   @Inject
-  BackgroundPropertyImpl(ObjectFactory objectFactory, ProviderFactory providerFactory) {
+  BackgroundPropertyImpl(ProviderFactory providerFactory, ObjectFactory objectFactory) {
     this.@background = objectFactory.property(Color)
-    this.@providerFactory = providerFactory
     this.@provider = providerFactory.provider {
       (Background)new BackgroundImpl(background.get())
     }
   }
-
-  @Delegate
-  private final Provider<Background> provider
 
   private static final Transformer<Color, Background> COLOR_TRANSFORMER = new Transformer<Color, Background>() {
     @Override

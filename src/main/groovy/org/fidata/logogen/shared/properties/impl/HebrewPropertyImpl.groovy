@@ -8,7 +8,10 @@ import javax.inject.Inject
 import org.fidata.logogen.shared.configurations.Hebrew
 import org.fidata.logogen.shared.configurations.impl.HebrewImpl
 import org.fidata.logogen.shared.enums.HebrewLogoGenerationMethod
-import org.fidata.logogen.shared.providers.HebrewProvider
+import org.fidata.logogen.shared.properties.ConfigurableDefault
+import org.fidata.logogen.shared.properties.ConfigurableHebrew
+import org.fidata.logogen.shared.properties.ConfigurableRtl
+import org.fidata.utils.ImmutableWithCustomConstructors
 import org.gradle.api.Transformer
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
@@ -17,28 +20,35 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 
+@ImmutableWithCustomConstructors
 @CompileStatic
-final class HebrewPropertyImpl implements HebrewProvider, Property<Hebrew> {
-  protected final ProjectLayout projectLayout
-  protected final ProviderFactory providerFactory
-
+final class HebrewPropertyImpl implements ConfigurableHebrew, Property<Hebrew> {
+  @Delegate(includeTypes = [ConfigurableDefault, ConfigurableRtl])
+  private final RtlPropertyImpl configurableRtl
   final RegularFileProperty hebrewSrcFile
-
   final Property<HebrewLogoGenerationMethod> hebrewLogoGenerationMethod
-
-  @Inject
-  HebrewPropertyImpl(ObjectFactory objectFactory, ProviderFactory providerFactory, ProjectLayout projectLayout) {
-    this.@hebrewSrcFile = objectFactory.fileProperty()
-    this.@hebrewLogoGenerationMethod = objectFactory.property(HebrewLogoGenerationMethod)
-    this.@providerFactory = providerFactory
-    this.@projectLayout = projectLayout
-    this.@provider = providerFactory.provider {
-      (Hebrew)new HebrewImpl(hebrewSrcFile.get().asFile, hebrewLogoGenerationMethod.get())
-    }
-  }
 
   @Delegate
   private final Provider<Hebrew> provider
+
+  @Inject
+  HebrewPropertyImpl(ProviderFactory providerFactory, ObjectFactory objectFactory, ProjectLayout projectLayout) {
+    this.@configurableRtl = new RtlPropertyImpl(providerFactory, objectFactory, projectLayout)
+    this.@hebrewSrcFile = objectFactory.fileProperty()
+    this.@hebrewLogoGenerationMethod = objectFactory.property(HebrewLogoGenerationMethod)
+    this.@provider = providerFactory.provider {
+      (Hebrew)new HebrewImpl(configurableRtl.srcFile.get().asFile, configurableRtl.rtlSrcFile.get().asFile, configurableRtl.rtlLogoGenerationMethod.get(), hebrewSrcFile.get().asFile, hebrewLogoGenerationMethod.get())
+    }
+  }
+
+  // WORKAROUND: @Delegate doesn't support both includes and includeTypes
+  ProviderFactory getProviderFactory() {
+    this.@configurableRtl.providerFactory
+  }
+
+  ProjectLayout getProjectLayout() {
+    this.@configurableRtl.projectLayout
+  }
 
   private static final Transformer<File, Hebrew> HEBREW_SRC_FILE_TRANSFORMER = new Transformer<File, Hebrew>() {
     @Override
@@ -55,8 +65,8 @@ final class HebrewPropertyImpl implements HebrewProvider, Property<Hebrew> {
   }
 
   @Override
-  void set(@Nullable Hebrew hebrewConfiguration) {
-    value hebrewConfiguration
+  void set(@Nullable Hebrew hebrew) {
+    value hebrew
   }
 
   @Override
@@ -66,21 +76,24 @@ final class HebrewPropertyImpl implements HebrewProvider, Property<Hebrew> {
   }
 
   @Override
-  Property<Hebrew> value(@Nullable Hebrew hebrewConfiguration) {
-    this.@hebrewSrcFile.set hebrewConfiguration?.hebrewSrcFile
-    this.@hebrewLogoGenerationMethod.set hebrewConfiguration?.hebrewLogoGenerationMethod
+  Property<Hebrew> value(@Nullable Hebrew hebrew) {
+    this.@configurableRtl.value hebrew
+    this.@hebrewSrcFile.set hebrew?.hebrewSrcFile
+    this.@hebrewLogoGenerationMethod.set hebrew?.hebrewLogoGenerationMethod
     this
   }
 
   @Override
-  Property<Hebrew> convention(Hebrew hebrewConfiguration) {
-    this.@hebrewSrcFile.convention projectLayout.file(providerFactory.provider { hebrewConfiguration.hebrewSrcFile })
-    this.@hebrewLogoGenerationMethod.convention providerFactory.provider { hebrewConfiguration.hebrewLogoGenerationMethod }
+  Property<Hebrew> convention(Hebrew hebrew) {
+    this.@configurableRtl.convention hebrew
+    this.@hebrewSrcFile.convention projectLayout.file(providerFactory.provider { hebrew.hebrewSrcFile })
+    this.@hebrewLogoGenerationMethod.convention providerFactory.provider { hebrew.hebrewLogoGenerationMethod }
     this
   }
 
   @Override
   Property<Hebrew> convention(Provider<? extends Hebrew> provider) {
+    this.@configurableRtl.convention provider
     this.@hebrewSrcFile.convention projectLayout.file(provider.map(HEBREW_SRC_FILE_TRANSFORMER))
     this.@hebrewLogoGenerationMethod.convention provider.map(HEBREW_LOGO_GENERATION_METHOD_TRANSFORMER)
     this
@@ -88,6 +101,7 @@ final class HebrewPropertyImpl implements HebrewProvider, Property<Hebrew> {
 
   @Override
   void finalizeValue() {
+    this.@configurableRtl.finalizeValue()
     this.@hebrewSrcFile.finalizeValue()
     this.@hebrewLogoGenerationMethod.finalizeValue()
   }

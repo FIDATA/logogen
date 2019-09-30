@@ -8,7 +8,7 @@ import org.fidata.logogen.shared.configurations.Default
 @CompileStatic
 final class DefaultImpl implements Default {
   /**
-   * Source file, in SVG format
+   * {@inheritDoc}
    */
   final File srcFile
 }

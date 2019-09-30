@@ -8,7 +8,9 @@ import javax.inject.Inject
 import org.fidata.logogen.shared.configurations.Rtl
 import org.fidata.logogen.shared.configurations.impl.RtlImpl
 import org.fidata.logogen.shared.enums.RtlLogoGenerationMethod
-import org.fidata.logogen.shared.providers.RtlProvider
+import org.fidata.logogen.shared.properties.ConfigurableDefault
+import org.fidata.logogen.shared.properties.ConfigurableRtl
+import org.fidata.utils.ImmutableWithCustomConstructors
 import org.gradle.api.Transformer
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
@@ -17,28 +19,35 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 
+@ImmutableWithCustomConstructors
 @CompileStatic
-final class RtlPropertyImpl implements RtlProvider, Property<Rtl> {
-  protected final ProjectLayout projectLayout
-  protected final ProviderFactory providerFactory
-
+final class RtlPropertyImpl implements ConfigurableRtl, Property<Rtl> {
+  @Delegate(includeTypes = [ConfigurableDefault])
+  private final DefaultPropertyImpl configurableDefault
   final RegularFileProperty rtlSrcFile
-
   final Property<RtlLogoGenerationMethod> rtlLogoGenerationMethod
-
-  @Inject
-  RtlPropertyImpl(ObjectFactory objectFactory, ProviderFactory providerFactory, ProjectLayout projectLayout) {
-    this.@rtlSrcFile = objectFactory.fileProperty()
-    this.@rtlLogoGenerationMethod = objectFactory.property(RtlLogoGenerationMethod)
-    this.@providerFactory = providerFactory
-    this.@projectLayout = projectLayout
-    this.@provider = providerFactory.provider {
-      (Rtl)new RtlImpl(rtlSrcFile.get().asFile, rtlLogoGenerationMethod.get())
-    }
-  }
 
   @Delegate
   private final Provider<Rtl> provider
+
+  @Inject
+  RtlPropertyImpl(ProviderFactory providerFactory, ObjectFactory objectFactory, ProjectLayout projectLayout) {
+    this.@configurableDefault = new DefaultPropertyImpl(providerFactory, objectFactory, projectLayout)
+    this.@rtlSrcFile = objectFactory.fileProperty()
+    this.@rtlLogoGenerationMethod = objectFactory.property(RtlLogoGenerationMethod)
+    this.@provider = providerFactory.provider {
+      (Rtl)new RtlImpl(configurableDefault.srcFile.get().asFile, rtlSrcFile.get().asFile, rtlLogoGenerationMethod.get())
+    }
+  }
+
+  // WORKAROUND: @Delegate doesn't support both includes and includeTypes
+  ProviderFactory getProviderFactory() {
+    this.@configurableDefault.providerFactory
+  }
+
+  ProjectLayout getProjectLayout() {
+    this.@configurableDefault.projectLayout
+  }
 
   private static final Transformer<File, Rtl> RTL_SRC_FILE_TRANSFORMER = new Transformer<File, Rtl>() {
     @Override
@@ -49,15 +58,9 @@ final class RtlPropertyImpl implements RtlProvider, Property<Rtl> {
 
   private static final Transformer<RtlLogoGenerationMethod, Rtl> RTL_LOGO_GENERATION_METHOD_TRANSFORMER = new Transformer<RtlLogoGenerationMethod, Rtl>() {
     @Override
-    RtlLogoGenerationMethod transform(Rtl rtlConfiguration) {
-      rtlConfiguration.rtlLogoGenerationMethod
+    RtlLogoGenerationMethod transform(Rtl rtl) {
+      rtl.rtlLogoGenerationMethod
     }
-  }
-
-  @Override
-  void set(Provider<? extends Rtl> provider) {
-    this.@rtlSrcFile.set projectLayout.file(provider.map(RTL_SRC_FILE_TRANSFORMER))
-    this.@rtlLogoGenerationMethod.set provider.map(RTL_LOGO_GENERATION_METHOD_TRANSFORMER)
   }
 
   @Override
@@ -66,21 +69,31 @@ final class RtlPropertyImpl implements RtlProvider, Property<Rtl> {
   }
 
   @Override
-  Property<Rtl> value(@Nullable Rtl rtlConfiguration) {
-    this.@rtlSrcFile.set rtlConfiguration?.rtlSrcFile
-    this.@rtlLogoGenerationMethod.set rtlConfiguration?.rtlLogoGenerationMethod
+  void set(Provider<? extends Rtl> provider) {
+    this.@configurableDefault.set provider
+    this.@rtlSrcFile.set projectLayout.file(provider.map(RTL_SRC_FILE_TRANSFORMER))
+    this.@rtlLogoGenerationMethod.set provider.map(RTL_LOGO_GENERATION_METHOD_TRANSFORMER)
+  }
+
+  @Override
+  Property<Rtl> value(@Nullable Rtl rtl) {
+    this.@configurableDefault.value rtl
+    this.@rtlSrcFile.set rtl?.rtlSrcFile
+    this.@rtlLogoGenerationMethod.set rtl?.rtlLogoGenerationMethod
     this
   }
 
   @Override
-  Property<Rtl> convention(Rtl rtlConfiguration) {
-    this.@rtlSrcFile.convention projectLayout.file(providerFactory.provider { rtlConfiguration.rtlSrcFile })
-    this.@rtlLogoGenerationMethod.convention providerFactory.provider { rtlConfiguration.rtlLogoGenerationMethod }
+  Property<Rtl> convention(Rtl rtl) {
+    this.@configurableDefault.convention rtl
+    this.@rtlSrcFile.convention projectLayout.file(providerFactory.provider { rtl.rtlSrcFile })
+    this.@rtlLogoGenerationMethod.convention providerFactory.provider { rtl.rtlLogoGenerationMethod }
     this
   }
 
   @Override
   Property<Rtl> convention(Provider<? extends Rtl> provider) {
+    this.@configurableDefault.convention provider
     this.@rtlSrcFile.convention projectLayout.file(provider.map(RTL_SRC_FILE_TRANSFORMER))
     this.@rtlLogoGenerationMethod.convention provider.map(RTL_LOGO_GENERATION_METHOD_TRANSFORMER)
     this
@@ -88,6 +101,7 @@ final class RtlPropertyImpl implements RtlProvider, Property<Rtl> {
 
   @Override
   void finalizeValue() {
+    this.@configurableDefault.finalizeValue()
     this.@rtlSrcFile.finalizeValue()
     this.@rtlLogoGenerationMethod.finalizeValue()
   }
