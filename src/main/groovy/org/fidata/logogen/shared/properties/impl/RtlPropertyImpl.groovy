@@ -10,7 +10,7 @@ import org.fidata.logogen.shared.configurations.impl.RtlImpl
 import org.fidata.logogen.shared.enums.RtlLogoGenerationMethod
 import org.fidata.logogen.shared.properties.ConfigurableDefault
 import org.fidata.logogen.shared.properties.ConfigurableRtl
-import org.fidata.utils.ImmutableWithCustomConstructors
+import org.fidata.groovy.utils.ImmutableWithCustomConstructors
 import org.gradle.api.Transformer
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
@@ -22,7 +22,7 @@ import org.gradle.api.provider.ProviderFactory
 @ImmutableWithCustomConstructors
 @CompileStatic
 final class RtlPropertyImpl implements ConfigurableRtl, Property<Rtl> {
-  @Delegate(includeTypes = [ConfigurableDefault])
+  @Delegate(includeTypes = [ConfigurableDefault], interfaces = false)
   private final DefaultPropertyImpl configurableDefault
   final RegularFileProperty rtlSrcFile
   final Property<RtlLogoGenerationMethod> rtlLogoGenerationMethod

@@ -4,6 +4,7 @@ package org.fidata.imagemagick.quantization.color
 
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
+import org.fidata.imagemagick.IMOperationWithoutIO
 import org.gradle.api.tasks.Input
 import org.im4java.core.IMOperation
 
@@ -17,8 +18,8 @@ final class Threshold extends ColorReduction {
   final Integer threshold
 
   @Override
-  IMOperation toIMOperation() {
-    IMOperation operation = new IMOperation()
+  IMOperationWithoutIO toIMOperation() {
+    IMOperationWithoutIO operation = new IMOperationWithoutIO()
     operation.separate().threshold(threshold, null, null, null, true).combine()
     operation
   }

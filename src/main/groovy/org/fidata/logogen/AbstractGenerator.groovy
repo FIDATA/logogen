@@ -2,14 +2,16 @@
 // SPDX-License-Identifier: Apache-2.0
 package org.fidata.logogen
 
+import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableSet
 import com.google.common.io.Resources
 import groovy.text.Template
 import groovy.text.TemplateEngine
 import groovy.text.XmlTemplateEngine
 import groovy.transform.CompileStatic
-import groovy.transform.InheritConstructors
+import java.nio.file.Path
 import javax.inject.Inject
+import org.fidata.groovy.utils.InheritInjectableConstructors
 import org.fidata.logogen.shared.configurations.Default
 import org.fidata.logogen.shared.configurations.Hebrew
 import org.fidata.logogen.shared.configurations.Rtl
@@ -22,7 +24,6 @@ import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.provider.Provider
@@ -71,12 +72,7 @@ abstract class AbstractGenerator implements Plugin<Project> {
   abstract Class<? extends AbstractGeneratorTask> getConverterImplClass()
 
   // TODO
-  protected final CopySpec copySpec(@DelegatesTo(CopySpec) Closure closure) {
-    project.copySpec closure
-  }
-
-  // TODO
-  abstract Map<String, CopySpec> getOutputs(Provider<? extends ConfigurableDefault> /* TODO */ configuration)
+  // abstract Map<String, CopySpec> getOutputs(Provider<? extends ConfigurableDefault> /* TODO */ configuration)
 
   /**
    * Extension with configuration of generator
@@ -110,14 +106,15 @@ abstract class AbstractGenerator implements Plugin<Project> {
     @OutputDirectory
     final DirectoryProperty outputDir = project.objects.directoryProperty()
 
-    protected Set<Class<? extends ImageMagickConvertOperation<ConfigurationClass>>> getImageMagicConvertOperationClasses() {
-      ImmutableSet.of()
-    }
-    protected Set<Class<? extends GenerateXmlOperation>> getGenerateXmlOperationClasses() {
-      ImmutableSet.of()
-    }
+    /**
+     * Gets actual operation done on image.
+     * Should be implemented by classes inheriting this one
+     */
+    protected abstract /* TODO: List */ IMOperation getIMOperation()
 
-    protected abstract Class<OutputLayout> getOutputLayoutClass()
+    protected abstract Class<? extends OutputLayout> getDefaultOutputLayoutClass()
+
+    protected Map<String, Class<? extends OutputLayout>> getAlternativeOutputLayoutClass() { ImmutableMap.of() }
 
     AbstractGeneratorTask(WorkerExecutor workerExecutor) {
       this.@workerExecutor = workerExecutor
@@ -125,8 +122,9 @@ abstract class AbstractGenerator implements Plugin<Project> {
 
     @TaskAction
     protected final void run() {
-      imageMagicConvertOperationClasses.each { Class<? extends ImageMagickConvertOperation> imageMagickConvertOperationClass ->
-        workerExecutor.submit(imageMagickConvertOperationClass, new Action<WorkerConfiguration>() {
+      IMOperation imOperation = this.IMOperation
+      if (imOperation) {
+        workerExecutor.submit(IMConvertOperation /* TODO */, new Action<WorkerConfiguration>() {
           @Override
           void execute(WorkerConfiguration workerConfiguration) {
             workerConfiguration.isolationMode = IsolationMode.NONE
@@ -154,7 +152,7 @@ abstract class AbstractGenerator implements Plugin<Project> {
      * and pass them to {@code super} constructor.
      * All other arguments may be placed after these three.</b>
      */
-    abstract static class ImageMagickConvertOperation<ConfigurationClass extends Default> implements Runnable {
+    private static class IMConvertOperation<ConfigurationClass extends Default> implements Runnable {
       private static final ConvertCmd CONVERT_CMD = new ConvertCmd()
   
       private final boolean debug
@@ -168,7 +166,7 @@ abstract class AbstractGenerator implements Plugin<Project> {
        * @param debug
        */
       @Inject
-      ImageMagickConvertOperation(boolean debug = false, File outputDir, ConfigurationClass configuration, Class<? extends OutputLayout<ConfigurationClass>> outputLayoutClass) {
+      IMConvertOperation(boolean debug = false, File outputDir, ConfigurationClass configuration, Class<? extends OutputLayout<ConfigurationClass>> outputLayoutClass) {
         this.@debug = debug
         this.@outputDir = outputDir
         this.@configuration = configuration
@@ -184,16 +182,12 @@ abstract class AbstractGenerator implements Plugin<Project> {
         // operation.define('stream:buffer-size=0') // We may need this to avoid cache problems
         operation.addImage(configuration.srcFile.toString())
         IMOperation suboperation = this.operation
-        suboperation.write(outputLayout.getOutputDirFileName(configuration, [:] /* TODO */).toString())
+        File outputFile = outputDir.toPath().resolve(outputLayout.getOutputPath(configuration, [:] /* TODO */)).toFile()
+        assert outputFile.parentFile.mkdirs()
+        suboperation.write(outputFile.toString())
         operation.addSubOperation(suboperation)
         CONVERT_CMD.run(operation)
       }
-  
-      /**
-       * Gets actual operation done on image.
-       * Should be implemented by classes inheriting this one
-       */
-      protected abstract IMOperation getOperation()
     }
 
     /**
@@ -201,7 +195,7 @@ abstract class AbstractGenerator implements Plugin<Project> {
      * Template should be placed in resources, and implementation
      * should pass resource name as a first argument to {@code super} constructor
      */
-    abstract protected static class GenerateXmlOperation implements Runnable {
+    private static class GenerateXmlOperation implements Runnable {
       private static final TemplateEngine TEMPLATE_ENGINE = new XmlTemplateEngine()
       private final Template template
       private final File outputFile
@@ -221,7 +215,7 @@ abstract class AbstractGenerator implements Plugin<Project> {
        * Map of template variable bindings
        * @return
        */
-      abstract protected Map getBindings()
+      // TODO abstract protected Map getBindings()
     }
   
     /*protected final void exec(List<String> commandLine) {
@@ -230,29 +224,24 @@ abstract class AbstractGenerator implements Plugin<Project> {
       }
     }*/
   
-    protected final void copy(Object into, Closure rename) { // TODO
+    /* TODO: svgo protected final void copy(Object into, Closure rename) { // TODO
       project.copy { CopySpec copySpec ->
         copySpec.from srcFile
         copySpec.into into
         copySpec.rename rename
       }
-    }
+    }*/
 
-    abstract static class OutputLayout<ConfigurationClass extends Default> {
-      abstract File getOutputDirFileName(ConfigurationClass configuration, Map<String, ?> context)
+    interface OutputLayout<ConfigurationClass extends Default> {
+      Path getOutputPath(ConfigurationClass configuration, Map<String, ?> context)
     }
   }
 
   /**
    * Logo Generator that is able to generate a separate icon for RTL locale
    */
-  @InheritConstructors
+  @InheritInjectableConstructors
   abstract static class AbstractGeneratorTaskWithRtl<ConfigurationClass extends Rtl, ConfigurableClass extends Provider<? extends ConfigurationClass>> extends AbstractGeneratorTask implements ConfigurableRtl {
-    @Override
-    protected Set<Class<? extends ImageMagickConvertOperation<ConfigurationClass>>> getImageMagicConvertOperationClasses() {
-      ImmutableSet.of()
-    }
-
     { // TODO
       rtlLogoGenerationMethod.convention project.providers.provider {
         rtlSrcFile.present ? RtlLogoGenerationMethod.SEPARATE_SOURCE : RtlLogoGenerationMethod.MIRROW
@@ -267,8 +256,8 @@ abstract class AbstractGenerator implements Plugin<Project> {
      * as first five arguments and pass them to {@code super} constructor.
      * All other arguments may be placed after these five.</b>
      */
-    @InheritConstructors
-    abstract static class ImageMagickConvertOperation<ConfigurationClass extends Rtl> extends AbstractGeneratorTask.ImageMagickConvertOperation<ConfigurationClass> {
+    @InheritInjectableConstructors
+    private static class IMConvertOperation<ConfigurationClass extends Rtl> extends AbstractGeneratorTask.IMConvertOperation<ConfigurationClass> {
       // TODO
     }
   }
@@ -276,14 +265,9 @@ abstract class AbstractGenerator implements Plugin<Project> {
   /**
    * Logo Generator that is able to generate a separate icons for RTL and Hebrew locales
    */
-  @InheritConstructors
+  @InheritInjectableConstructors
   abstract static class AbstractGeneratorTaskWithRtlAndHebrew<ConfigurationClass extends Hebrew, ConfigurableClass extends Provider<? extends ConfigurationClass>> extends AbstractGeneratorTaskWithRtl implements ConfigurableHebrew {
-    @Override
-    protected Set<Class<? extends ImageMagickConvertOperation<ConfigurationClass>>> getImageMagicConvertOperationClasses() {
-      ImmutableSet.of()
-    }
-
-    { // TODO
+    { // TODO if this is required, configuration should be a parameter in constructor
       hebrewLogoGenerationMethod.convention project.providers.provider {
         hebrewSrcFile.present ? HebrewLogoGenerationMethod.SEPARATE_SOURCE : HebrewLogoGenerationMethod.STANDARD_RTL
       }
@@ -298,8 +282,8 @@ abstract class AbstractGenerator implements Plugin<Project> {
      * as first seven arguments and pass them to {@code super} constructor.
      * All other arguments may be placed after these seven.</b>
      */
-    @InheritConstructors
-    abstract static class ImageMagickConvertOperation<ConfigurationClass extends Hebrew> extends AbstractGeneratorTaskWithRtl.ImageMagickConvertOperation<ConfigurationClass> {
+    @InheritInjectableConstructors
+    private static class IMConvertOperation<ConfigurationClass extends Hebrew> extends AbstractGeneratorTaskWithRtl.IMConvertOperation<ConfigurationClass> {
       // TODO
     }
   }

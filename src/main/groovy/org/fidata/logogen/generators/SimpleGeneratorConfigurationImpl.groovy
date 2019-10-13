@@ -7,7 +7,7 @@ import org.fidata.logogen.shared.configurations.Default
 import org.fidata.logogen.shared.configurations.Name
 import org.fidata.logogen.shared.configurations.impl.DefaultImpl
 import org.fidata.logogen.shared.configurations.impl.NameImpl
-import org.fidata.utils.ImmutableWithCustomConstructors
+import org.fidata.groovy.utils.ImmutableWithCustomConstructors
 
 @ImmutableWithCustomConstructors
 @CompileStatic

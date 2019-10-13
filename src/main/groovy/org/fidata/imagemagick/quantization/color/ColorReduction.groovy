@@ -3,15 +3,16 @@
 package org.fidata.imagemagick.quantization.color
 
 import groovy.transform.CompileStatic
+import org.fidata.imagemagick.IMOperationWithoutIO
 import org.im4java.core.IMOperation
 
 @CompileStatic
 abstract class ColorReduction implements Serializable {
-  abstract IMOperation toIMOperation()
+  abstract IMOperationWithoutIO toIMOperation()
 
   final Object asType(Class clazz) {
     if (clazz == IMOperation) {
-      toIMOperation()
+      toIMOperation().toIMOperation()
     }
     super.asType(clazz)
   }

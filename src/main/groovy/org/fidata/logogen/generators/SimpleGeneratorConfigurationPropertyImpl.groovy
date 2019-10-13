@@ -9,7 +9,7 @@ import org.fidata.logogen.shared.properties.ConfigurableDefault
 import org.fidata.logogen.shared.properties.ConfigurableName
 import org.fidata.logogen.shared.properties.impl.DefaultPropertyImpl
 import org.fidata.logogen.shared.properties.impl.NamePropertyImpl
-import org.fidata.utils.ImmutableWithCustomConstructors
+import org.fidata.groovy.utils.ImmutableWithCustomConstructors
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -19,9 +19,9 @@ import org.gradle.api.provider.ProviderFactory
 @ImmutableWithCustomConstructors
 @CompileStatic
 final class SimpleGeneratorConfigurationPropertyImpl implements ConfigurableSimpleGeneratorConfiguration, Provider<SimpleGeneratorConfigurationForIM>, Property<SimpleGeneratorConfiguration> {
-  @Delegate(includeTypes = [ConfigurableDefault]/* TOTEST , methodAnnotations = true */)
+  @Delegate(includeTypes = [ConfigurableDefault]/* TOTEST , methodAnnotations = true */, interfaces = false)
   private final DefaultPropertyImpl configurableDefault
-  @Delegate(includeTypes = [ConfigurableName]/* TOTEST , methodAnnotations = true */)
+  @Delegate(includeTypes = [ConfigurableName]/* TOTEST , methodAnnotations = true */, interfaces = false)
   private final NamePropertyImpl configurableName
 
   @Delegate

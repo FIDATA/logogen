@@ -4,7 +4,9 @@ package org.fidata.logogen.generators
 
 import com.google.common.collect.ImmutableSet
 import groovy.transform.CompileStatic
-import groovy.transform.InheritConstructors
+import java.nio.file.Path
+import java.nio.file.Paths
+import org.fidata.groovy.utils.InheritInjectableConstructors
 import org.fidata.imagemagick.Units
 import org.fidata.logogen.AbstractGenerator
 import org.gradle.api.provider.Provider
@@ -13,8 +15,8 @@ import org.im4java.core.IMOperation
 
 @CompileStatic
 abstract class SimpleGenerator extends AbstractGenerator {
-  abstract class SimpleGeneratorTask extends AbstractGenerator.AbstractGeneratorTask<SimpleGeneratorConfiguration, Provider<SimpleGeneratorConfigurationForIM>> {
-    @Delegate(includeTypes = [ConfigurableSimpleGeneratorConfiguration])
+  abstract static class SimpleGeneratorTask extends AbstractGenerator.AbstractGeneratorTask<SimpleGeneratorConfiguration, Provider<SimpleGeneratorConfigurationForIM>> {
+    @Delegate(includeTypes = [ConfigurableSimpleGeneratorConfiguration], interfaces = false, methodAnnotations = true)
     protected final SimpleGeneratorConfigurationPropertyImpl simpleGeneratorConfiguration
 
     @Override
@@ -23,8 +25,13 @@ abstract class SimpleGenerator extends AbstractGenerator {
     }
 
     @Override
-    protected Set<Class<? extends ImageMagickConvertOperation<? extends SimpleGeneratorConfiguration>>> getImageMagicConvertOperationClasses() {
-      ImmutableSet.of(ImageMagickResizeAndConvertOperation)
+    protected Set<Class<? extends AbstractGenerator.AbstractGeneratorTask.IMConvertOperation<? extends SimpleGeneratorConfiguration>>> getIMConvertOperationClasses() {
+      ImmutableSet.of(IMConvertOperation)
+    }
+
+    @Override
+    protected final Class<DefaultOutputLayout> getDefaultOutputLayoutClass() {
+      DefaultOutputLayout
     }
 
     SimpleGeneratorTask(WorkerExecutor workerExecutor, int size, String format, Integer density = null) {
@@ -35,8 +42,9 @@ abstract class SimpleGenerator extends AbstractGenerator {
       }
     }
 
-    @InheritConstructors
-    final protected static class ImageMagickResizeAndConvertOperation extends AbstractGenerator.AbstractGeneratorTask.ImageMagickConvertOperation<SimpleGeneratorConfigurationForIM> {
+    @InheritInjectableConstructors
+    private final static class IMConvertOperation extends AbstractGenerator.AbstractGeneratorTask.IMConvertOperation<SimpleGeneratorConfigurationForIM> {
+      // TODO
       @Override
       protected IMOperation getOperation() {
         IMOperation operation = new IMOperation()
@@ -52,15 +60,10 @@ abstract class SimpleGenerator extends AbstractGenerator {
       }
     }
 
-    @Override
-    protected final Class<OutputLayout> getOutputLayoutClass() {
-      OutputLayout
-    }
-
-    final class OutputLayout extends AbstractGenerator.AbstractGeneratorTask.OutputLayout<SimpleGeneratorConfigurationForIM> {
+    private final static class DefaultOutputLayout implements AbstractGenerator.AbstractGeneratorTask.OutputLayout<SimpleGeneratorConfigurationForIM> {
       @Override
-      File getOutputDirFileName(SimpleGeneratorConfigurationForIM configuration, Map<String, ?> context) {
-        new File("${ configuration.logoName }.$configuration.format")
+      Path getOutputPath(SimpleGeneratorConfigurationForIM configuration, Map<String, ?> context) {
+        Paths.get("${ configuration.logoName }.$configuration.format")
       }
     }
   }

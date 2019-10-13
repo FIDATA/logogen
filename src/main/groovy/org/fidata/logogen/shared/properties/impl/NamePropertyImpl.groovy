@@ -8,7 +8,7 @@ import javax.inject.Inject
 import org.fidata.logogen.shared.configurations.Name
 import org.fidata.logogen.shared.configurations.impl.NameImpl
 import org.fidata.logogen.shared.properties.ConfigurableName
-import org.fidata.utils.ImmutableWithCustomConstructors
+import org.fidata.groovy.utils.ImmutableWithCustomConstructors
 import org.gradle.api.Transformer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property

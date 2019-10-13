@@ -1,4 +1,4 @@
-package org.fidata.utils
+package org.fidata.groovy.utils
 
 import groovy.transform.AnnotationCollector
 import groovy.transform.EqualsAndHashCode

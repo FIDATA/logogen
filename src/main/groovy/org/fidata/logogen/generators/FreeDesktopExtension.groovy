@@ -4,7 +4,7 @@ package org.fidata.logogen.generators
 
 import groovy.transform.CompileStatic
 import javax.inject.Inject
-import org.fidata.utils.ImmutableWithCustomConstructors
+import org.fidata.groovy.utils.ImmutableWithCustomConstructors
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ProviderFactory

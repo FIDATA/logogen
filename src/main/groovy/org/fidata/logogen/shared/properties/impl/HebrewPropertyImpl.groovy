@@ -11,7 +11,7 @@ import org.fidata.logogen.shared.enums.HebrewLogoGenerationMethod
 import org.fidata.logogen.shared.properties.ConfigurableDefault
 import org.fidata.logogen.shared.properties.ConfigurableHebrew
 import org.fidata.logogen.shared.properties.ConfigurableRtl
-import org.fidata.utils.ImmutableWithCustomConstructors
+import org.fidata.groovy.utils.ImmutableWithCustomConstructors
 import org.gradle.api.Transformer
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
@@ -23,7 +23,7 @@ import org.gradle.api.provider.ProviderFactory
 @ImmutableWithCustomConstructors
 @CompileStatic
 final class HebrewPropertyImpl implements ConfigurableHebrew, Property<Hebrew> {
-  @Delegate(includeTypes = [ConfigurableDefault, ConfigurableRtl])
+  @Delegate(includeTypes = [ConfigurableDefault, ConfigurableRtl], interfaces = false)
   private final RtlPropertyImpl configurableRtl
   final RegularFileProperty hebrewSrcFile
   final Property<HebrewLogoGenerationMethod> hebrewLogoGenerationMethod

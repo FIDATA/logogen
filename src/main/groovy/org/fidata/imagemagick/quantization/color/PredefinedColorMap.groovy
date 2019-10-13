@@ -4,6 +4,7 @@ package org.fidata.imagemagick.quantization.color
 
 import groovy.transform.CompileStatic
 import groovy.transform.Immutable
+import org.fidata.imagemagick.IMOperationWithoutIO
 import org.gradle.api.tasks.InputFile
 import org.im4java.core.IMOperation
 
@@ -14,8 +15,8 @@ final class PredefinedColorMap extends ColorReduction {
   final File colorMap
 
   @Override
-  IMOperation toIMOperation() {
-    IMOperation operation = new IMOperation()
+  IMOperationWithoutIO toIMOperation() {
+    IMOperationWithoutIO operation = new IMOperationWithoutIO()
     operation.p_dither().remap(colorMap.toString())
     operation
   }

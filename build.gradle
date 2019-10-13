@@ -6,7 +6,7 @@ plugins {
 }
 
 description = 'Generation of logo in all known formats'
-tags.set(['logo', 'imconv', 'convert', 'image', 'svg']) // TODO
+tags.set(['logo', 'imconv', 'convert', 'image', 'svg'])
 //noinspection GroovyUnusedAssignment
 license = 'Apache-2.0'
 //noinspection GroovyUnusedAssignment
@@ -37,6 +37,7 @@ gradlePlugin {
       id = 'org.fidata.logogen'
       implementationClass = 'org.fidata.logogen.LogoGenPlugin' // TODO: gradle package ?
     }
+    // TODO: generators
   }
 }
 

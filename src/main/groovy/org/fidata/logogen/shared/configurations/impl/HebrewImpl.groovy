@@ -1,11 +1,10 @@
 package org.fidata.logogen.shared.configurations.impl
 
 import groovy.transform.CompileStatic
-import groovy.transform.Immutable
 import org.fidata.logogen.shared.configurations.Hebrew
 import org.fidata.logogen.shared.enums.HebrewLogoGenerationMethod
 import org.fidata.logogen.shared.enums.RtlLogoGenerationMethod
-import org.fidata.utils.ImmutableWithCustomConstructors
+import org.fidata.groovy.utils.ImmutableWithCustomConstructors
 
 @ImmutableWithCustomConstructors(knownImmutableClasses = [File])
 @CompileStatic

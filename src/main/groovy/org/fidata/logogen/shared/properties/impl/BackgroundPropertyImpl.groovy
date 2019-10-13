@@ -9,7 +9,7 @@ import javax.inject.Inject
 import org.fidata.logogen.shared.configurations.Background
 import org.fidata.logogen.shared.configurations.impl.BackgroundImpl
 import org.fidata.logogen.shared.properties.ConfigurableBackground
-import org.fidata.utils.ImmutableWithCustomConstructors
+import org.fidata.groovy.utils.ImmutableWithCustomConstructors
 import org.gradle.api.Transformer
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
